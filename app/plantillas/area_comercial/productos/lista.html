@@ -1,0 +1,540 @@
+{% extends "area_comercial/base.html" %}
+
+
+{% block titulo %}
+Productos
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<div
+    class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"
+>
+
+    <div>
+
+        <h1 class="h3 mb-1">
+            Productos
+        </h1>
+
+        <p class="text-muted mb-0">
+
+            Catálogo general de productos registrados
+            en ROPUSAC.
+
+        </p>
+
+    </div>
+
+
+    <div class="d-flex gap-2 flex-wrap">
+
+        <a
+            href="{{ url_for(
+                'productos_comercial.importar_excel'
+            ) }}"
+            class="btn btn-outline-success"
+        >
+
+            <i class="bi bi-file-earmark-excel me-1"></i>
+
+            Importar Excel
+
+        </a>
+
+
+        <a
+            href="{{ url_for(
+                'productos_comercial.nuevo'
+            ) }}"
+            class="btn btn-primary"
+        >
+
+            <i class="bi bi-plus-circle me-1"></i>
+
+            Nuevo producto
+
+        </a>
+
+    </div>
+
+</div>
+
+
+<div class="alert alert-info border-0 shadow-sm mb-4">
+
+    <i class="bi bi-info-circle me-2"></i>
+
+    Este es un catálogo compartido. Se muestran
+    los productos registrados por todos los usuarios
+    del Área Comercial.
+
+</div>
+
+
+<!-- FILTROS -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body">
+
+        <form
+            method="GET"
+            class="row g-2"
+        >
+
+            <div class="col-lg-4">
+
+                <input
+                    type="text"
+                    class="form-control"
+                    name="buscar"
+                    value="{{ buscar }}"
+                    placeholder="Código, producto, marca, proveedor o usuario"
+                >
+
+            </div>
+
+
+            <div class="col-lg-3">
+
+                <select
+                    class="form-select"
+                    name="id_proveedor"
+                >
+
+                    <option value="">
+                        Todos los proveedores
+                    </option>
+
+                    {% for proveedor in proveedores %}
+
+                        <option
+                            value="{{ proveedor.id_proveedor }}"
+
+                            {% if
+                                id_proveedor
+                                == proveedor.id_proveedor
+                            %}
+                                selected
+                            {% endif %}
+                        >
+
+                            {{ proveedor.razon_social }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="col-lg-2">
+
+                <select
+                    class="form-select"
+                    name="origen"
+                >
+
+                    <option value="">
+                        Todos los usuarios
+                    </option>
+
+                    <option
+                        value="MIO"
+                        {% if origen == "MIO" %}
+                            selected
+                        {% endif %}
+                    >
+                        Registrados por mí
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="col-lg-2">
+
+                <select
+                    class="form-select"
+                    name="imagen"
+                >
+
+                    <option value="">
+                        Todas las imágenes
+                    </option>
+
+                    <option
+                        value="CON_IMAGEN"
+                        {% if estado_imagen == "CON_IMAGEN" %}
+                            selected
+                        {% endif %}
+                    >
+                        Con imagen
+                    </option>
+
+                    <option
+                        value="SIN_IMAGEN"
+                        {% if estado_imagen == "SIN_IMAGEN" %}
+                            selected
+                        {% endif %}
+                    >
+                        Sin imagen
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="col-auto">
+
+                <button
+                    class="btn btn-outline-primary"
+                    type="submit"
+                >
+
+                    <i class="bi bi-search"></i>
+
+                    Buscar
+
+                </button>
+
+            </div>
+
+
+            <div class="col-auto">
+
+                <a
+                    href="{{ url_for(
+                        'productos_comercial.lista'
+                    ) }}"
+                    class="btn btn-outline-secondary"
+                >
+                    Limpiar
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- PRODUCTOS -->
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Imagen
+                        </th>
+
+                        <th>
+                            Producto
+                        </th>
+
+                        <th>
+                            Proveedor
+                        </th>
+
+                        <th>
+                            Precio base
+                        </th>
+
+                        <th>
+                            Registrado por
+                        </th>
+
+                        <th class="text-end">
+                            Acciones
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                {% for item in productos %}
+
+
+                    {% set producto =
+                        item.producto
+                    %}
+
+
+                    <tr>
+
+
+                        <!-- IMAGEN -->
+
+                        <td>
+
+                            {% if item.imagen %}
+
+                                <img
+                                    src="{{ item.imagen.url_imagen }}"
+                                    alt="{{ producto.nombre }}"
+                                    class="rounded border"
+
+                                    style="
+                                        width: 70px;
+                                        height: 70px;
+                                        object-fit: contain;
+                                    "
+                                >
+
+                            {% else %}
+
+                                <div
+                                    class="rounded border bg-light d-flex align-items-center justify-content-center"
+
+                                    style="
+                                        width: 70px;
+                                        height: 70px;
+                                    "
+                                >
+
+                                    <i
+                                        class="bi bi-image text-muted fs-4"
+                                    ></i>
+
+                                </div>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- PRODUCTO -->
+
+                        <td>
+
+                            <strong>
+
+                                {{ producto.nombre }}
+
+                            </strong>
+
+                            <div class="small text-muted">
+
+                                {{ producto.codigo_producto }}
+
+                            </div>
+
+                            {% if producto.marca %}
+
+                                <div class="small text-muted">
+
+                                    {{ producto.marca }}
+
+                                    {% if producto.modelo %}
+                                        · {{ producto.modelo }}
+                                    {% endif %}
+
+                                </div>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- PROVEEDOR -->
+
+                        <td>
+
+                            {{ item.proveedor.razon_social }}
+
+                            {% if producto.codigo_proveedor %}
+
+                                <div class="small text-muted">
+
+                                    Código:
+                                    {{ producto.codigo_proveedor }}
+
+                                </div>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- PRECIO -->
+
+                        <td>
+
+                            <strong>
+
+                                {% if
+                                    producto.moneda_precio.value
+                                    == "PEN"
+                                %}
+                                    S/
+                                {% else %}
+                                    US$
+                                {% endif %}
+
+                                {{
+                                    "%.2f"|format(
+                                        producto.precio_base_actual
+                                    )
+                                }}
+
+                            </strong>
+
+                            <div class="small text-muted">
+
+                                {{ producto.moneda_precio.value }}
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- CREADOR -->
+
+                        <td>
+
+                            {{ item.registrado_por }}
+
+                            <div>
+
+                                {% if item.es_mio %}
+
+                                    <span
+                                        class="badge text-bg-primary"
+                                    >
+                                        Registrado por mí
+                                    </span>
+
+                                {% else %}
+
+                                    <span
+                                        class="badge text-bg-light"
+                                    >
+                                        Otro usuario
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- ACCIONES -->
+
+                        <td class="text-end">
+
+                            <a
+                                href="{{ url_for(
+                                    'productos_comercial.detalle',
+                                    id_producto=producto.id_producto
+                                ) }}"
+
+                                class="btn btn-sm btn-outline-secondary"
+                                title="Consultar"
+                            >
+
+                                <i class="bi bi-eye"></i>
+
+                            </a>
+
+
+                            <a
+                                href="{{ url_for(
+                                    'productos_comercial.editar',
+                                    id_producto=producto.id_producto
+                                ) }}"
+
+                                class="btn btn-sm btn-outline-primary"
+                                title="Editar"
+                            >
+
+                                <i class="bi bi-pencil"></i>
+
+                            </a>
+
+
+                            {% if not item.imagen %}
+
+                                <a
+                                    href="{{ url_for(
+                                        'productos_comercial.detalle',
+                                        id_producto=producto.id_producto
+                                    ) }}"
+
+                                    class="btn btn-sm btn-outline-success"
+                                    title="Agregar imagen"
+                                >
+
+                                    <i class="bi bi-image"></i>
+
+                                </a>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+
+                {% else %}
+
+
+                    <tr>
+
+                        <td
+                            colspan="6"
+                            class="text-center py-5"
+                        >
+
+                            <i
+                                class="bi bi-box-seam fs-1 text-muted"
+                            ></i>
+
+                            <div class="text-muted mt-2">
+
+                                No se encontraron productos.
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                {% endfor %}
+
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% endblock %}

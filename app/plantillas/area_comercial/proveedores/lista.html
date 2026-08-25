@@ -1,0 +1,581 @@
+{% extends "area_comercial/base.html" %}
+
+
+{% block titulo %}
+Proveedores
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<div
+    class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"
+>
+
+    <div>
+
+        <h1 class="h3 mb-1">
+            Proveedores
+        </h1>
+
+        <p class="text-muted mb-0">
+
+            Catálogo general de proveedores registrados
+            en ROPUSAC.
+
+        </p>
+
+    </div>
+
+
+    <a
+        href="{{ url_for(
+            'proveedores_comercial.nuevo'
+        ) }}"
+        class="btn btn-primary"
+    >
+
+        <i class="bi bi-plus-circle me-1"></i>
+
+        Nuevo proveedor
+
+    </a>
+
+</div>
+
+
+<!-- =====================================================
+     AVISO CATALOGO COMPARTIDO
+====================================================== -->
+
+<div
+    class="alert alert-info border-0 shadow-sm mb-4"
+>
+
+    <div class="d-flex gap-3">
+
+        <i
+            class="bi bi-info-circle fs-4"
+        ></i>
+
+        <div>
+
+            <strong>
+                Catálogo compartido
+            </strong>
+
+            <div class="small">
+
+                Aquí se muestran los proveedores
+                registrados por todos los usuarios.
+                Revise esta lista antes de registrar
+                uno nuevo para evitar duplicados.
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     FILTROS
+====================================================== -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body">
+
+        <form
+            method="GET"
+            class="row g-2"
+        >
+
+            <div class="col-lg-6">
+
+                <input
+                    type="text"
+                    class="form-control"
+                    name="buscar"
+                    value="{{ buscar }}"
+                    placeholder="RUC, razón social, nombre comercial o usuario"
+                >
+
+            </div>
+
+
+            <div class="col-lg-3">
+
+                <select
+                    class="form-select"
+                    name="estado"
+                >
+
+                    <option value="">
+                        Todos los estados
+                    </option>
+
+
+                    <option
+                        value="ACTIVO"
+
+                        {% if estado == "ACTIVO" %}
+                            selected
+                        {% endif %}
+                    >
+                        Activos
+                    </option>
+
+
+                    <option
+                        value="INACTIVO"
+
+                        {% if estado == "INACTIVO" %}
+                            selected
+                        {% endif %}
+                    >
+                        Dados de baja
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="col-auto">
+
+                <button
+                    type="submit"
+                    class="btn btn-outline-primary"
+                >
+
+                    <i class="bi bi-search"></i>
+
+                    Buscar
+
+                </button>
+
+            </div>
+
+
+            <div class="col-auto">
+
+                <a
+                    href="{{ url_for(
+                        'proveedores_comercial.lista'
+                    ) }}"
+                    class="btn btn-outline-secondary"
+                >
+                    Limpiar
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     TABLA
+====================================================== -->
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+
+            <table
+                class="table table-hover align-middle"
+            >
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Proveedor
+                        </th>
+
+                        <th>
+                            Documento
+                        </th>
+
+                        <th>
+                            Contacto
+                        </th>
+
+                        <th>
+                            Registrado por
+                        </th>
+
+                        <th>
+                            Fecha
+                        </th>
+
+                        <th>
+                            Estado
+                        </th>
+
+                        <th class="text-end">
+                            Acciones
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                {% for item in proveedores %}
+
+
+                    {% set proveedor =
+                        item.proveedor
+                    %}
+
+
+                    <tr>
+
+
+                        <!-- =============================================
+                             PROVEEDOR
+                        ============================================== -->
+
+                        <td>
+
+                            <strong>
+
+                                {{ proveedor.razon_social }}
+
+                            </strong>
+
+
+                            {% if proveedor.nombre_comercial %}
+
+                                <div class="small text-muted">
+
+                                    {{ proveedor.nombre_comercial }}
+
+                                </div>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- =============================================
+                             DOCUMENTO
+                        ============================================== -->
+
+                        <td>
+
+                            {% if proveedor.numero_documento %}
+
+                                <div>
+
+                                    <span
+                                        class="badge text-bg-light"
+                                    >
+                                        RUC
+                                    </span>
+
+                                </div>
+
+                                <small>
+
+                                    {{ proveedor.numero_documento }}
+
+                                </small>
+
+                            {% else %}
+
+                                <span class="text-muted">
+
+                                    Sin documento
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- =============================================
+                             CONTACTO
+                        ============================================== -->
+
+                        <td>
+
+                            {% if proveedor.correo %}
+
+                                <div>
+
+                                    {{ proveedor.correo }}
+
+                                </div>
+
+                            {% endif %}
+
+
+                            {% if proveedor.celular %}
+
+                                <small class="text-muted">
+
+                                    {{ proveedor.celular }}
+
+                                </small>
+
+                            {% endif %}
+
+
+                            {% if
+                                not proveedor.correo
+                                and not proveedor.celular
+                            %}
+
+                                <span class="text-muted">
+
+                                    Sin contacto
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- =============================================
+                             REGISTRADO POR
+                        ============================================== -->
+
+                        <td>
+
+                            <div>
+
+                                {{ item.registrado_por }}
+
+                            </div>
+
+
+                            {% if item.es_mio %}
+
+                                <span
+                                    class="badge text-bg-primary"
+                                >
+                                    Registrado por mí
+                                </span>
+
+                            {% else %}
+
+                                <span
+                                    class="badge text-bg-light"
+                                >
+                                    Otro usuario
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- =============================================
+                             FECHA
+                        ============================================== -->
+
+                        <td>
+
+                            {{
+                                proveedor.creado_en.strftime(
+                                    "%d/%m/%Y"
+                                )
+                            }}
+
+                            <div class="small text-muted">
+
+                                {{
+                                    proveedor.creado_en.strftime(
+                                        "%H:%M"
+                                    )
+                                }}
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- =============================================
+                             ESTADO
+                        ============================================== -->
+
+                        <td>
+
+                            {% if proveedor.activo %}
+
+                                <span
+                                    class="badge text-bg-success"
+                                >
+                                    Activo
+                                </span>
+
+                            {% else %}
+
+                                <span
+                                    class="badge text-bg-secondary"
+                                >
+                                    Baja
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- =============================================
+                             ACCIONES
+                        ============================================== -->
+
+                        <td class="text-end">
+
+
+                            <a
+                                href="{{ url_for(
+                                    'proveedores_comercial.detalle',
+                                    id_proveedor=proveedor.id_proveedor
+                                ) }}"
+                                class="btn btn-sm btn-outline-secondary"
+                                title="Consultar"
+                            >
+
+                                <i class="bi bi-eye"></i>
+
+                            </a>
+
+
+                            <a
+                                href="{{ url_for(
+                                    'proveedores_comercial.editar',
+                                    id_proveedor=proveedor.id_proveedor
+                                ) }}"
+                                class="btn btn-sm btn-outline-primary"
+                                title="Editar"
+                            >
+
+                                <i class="bi bi-pencil"></i>
+
+                            </a>
+
+
+                            <form
+                                method="POST"
+
+                                action="{{ url_for(
+                                    'proveedores_comercial.cambiar_estado',
+                                    id_proveedor=proveedor.id_proveedor
+                                ) }}"
+
+                                class="d-inline"
+                            >
+
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    value="{{ csrf_token() }}"
+                                >
+
+
+                                {% if proveedor.activo %}
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-sm btn-outline-danger"
+                                        title="Dar de baja"
+
+                                        onclick="return confirm(
+                                            '¿Desea dar de baja este proveedor?'
+                                        );"
+                                    >
+
+                                        <i class="bi bi-x-circle"></i>
+
+                                    </button>
+
+                                {% else %}
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-sm btn-outline-success"
+                                        title="Reactivar"
+
+                                        onclick="return confirm(
+                                            '¿Desea reactivar este proveedor?'
+                                        );"
+                                    >
+
+                                        <i
+                                            class="bi bi-arrow-counterclockwise"
+                                        ></i>
+
+                                    </button>
+
+                                {% endif %}
+
+                            </form>
+
+
+                        </td>
+
+
+                    </tr>
+
+
+                {% else %}
+
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="text-center py-5"
+                        >
+
+                            <i
+                                class="bi bi-truck fs-1 text-muted"
+                            ></i>
+
+                            <div class="text-muted mt-2">
+
+                                No se encontraron proveedores.
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                {% endfor %}
+
+
+                </tbody>
+
+
+            </table>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% endblock %}

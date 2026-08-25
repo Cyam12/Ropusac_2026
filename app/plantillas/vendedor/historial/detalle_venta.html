@@ -1,0 +1,505 @@
+{% extends "vendedor/base.html" %}
+
+
+{% block titulo %}
+Historial Venta
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<div
+    class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"
+>
+
+    <div>
+
+        <h1 class="h3 mb-1">
+
+            {{ venta.numero_venta }}
+
+        </h1>
+
+        <p class="text-muted mb-0">
+
+            Consulta histórica de venta
+
+        </p>
+
+    </div>
+
+
+    <a
+        href="{{ url_for(
+            'dashboard.vendedor_historial'
+        ) }}"
+        class="btn btn-outline-secondary"
+    >
+
+        <i class="bi bi-arrow-left me-1"></i>
+
+        Volver
+
+    </a>
+
+</div>
+
+
+<div class="alert alert-light border">
+
+    <i class="bi bi-lock me-2"></i>
+
+    Esta venta pertenece al historial.
+    No puede editarse ni eliminarse.
+
+</div>
+
+
+<!-- =====================================================
+     INFORMACION
+====================================================== -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-header bg-white">
+
+        <strong>
+            Información de la venta
+        </strong>
+
+    </div>
+
+
+    <div class="card-body">
+
+        <div class="row g-4">
+
+
+            <div class="col-md-3">
+
+                <small class="text-muted">
+                    Estado
+                </small>
+
+                <div>
+
+                    {% if venta.estado == "FACTURADA" %}
+
+                        <span
+                            class="badge text-bg-success"
+                        >
+                            FACTURADA
+                        </span>
+
+                    {% else %}
+
+                        <span
+                            class="badge text-bg-secondary"
+                        >
+
+                            {{
+                                venta.estado.replace(
+                                    "_",
+                                    " "
+                                )
+                            }}
+
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <small class="text-muted">
+                    Fecha de venta
+                </small>
+
+                <div>
+
+                    {{
+                        venta.fecha_venta.strftime(
+                            "%d/%m/%Y"
+                        )
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <small class="text-muted">
+                    Vendedor
+                </small>
+
+                <div>
+
+                    {{ venta.vendedor }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <small class="text-muted">
+                    Moneda
+                </small>
+
+                <div>
+
+                    {{ venta.moneda }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Cliente
+                </small>
+
+                <div class="fw-semibold">
+
+                    {{ venta.cliente }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <small class="text-muted">
+                    Documento
+                </small>
+
+                <div>
+
+                    {{ venta.tipo_documento }}
+
+                    {{
+                        venta.numero_documento
+                        or ""
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <small class="text-muted">
+                    Cotización origen
+                </small>
+
+                <div>
+
+                    {{ venta.numero_cotizacion }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Boleta
+                </small>
+
+                <div>
+
+                    {% if venta.id_boleta %}
+
+                        {{
+                            venta.serie
+                            or ""
+                        }}-{{
+                            venta.numero_boleta
+                            or ""
+                        }}
+
+                        <span
+                            class="badge text-bg-secondary ms-2"
+                        >
+
+                            {{
+                                venta.estado_boleta.replace(
+                                    "_",
+                                    " "
+                                )
+                            }}
+
+                        </span>
+
+                    {% else %}
+
+                        No generada
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Tipo de cambio
+                </small>
+
+                <div>
+
+                    1 USD =
+
+                    {{
+                        "%.6f"|format(
+                            venta.tipo_cambio_soles_por_dolar
+                        )
+                    }}
+
+                    PEN
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     PRODUCTOS
+====================================================== -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-header bg-white">
+
+        <strong>
+            Productos vendidos
+        </strong>
+
+    </div>
+
+
+    <div class="table-responsive">
+
+        <table class="table mb-0 align-middle">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Código
+                    </th>
+
+                    <th>
+                        Producto
+                    </th>
+
+                    <th class="text-end">
+                        Cantidad
+                    </th>
+
+                    <th class="text-end">
+                        Precio final
+                    </th>
+
+                    <th class="text-end">
+                        Importe
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for item in detalles %}
+
+                    <tr>
+
+                        <td>
+                            {{ item.codigo_producto }}
+                        </td>
+
+                        <td>
+                            {{ item.nombre_producto }}
+                        </td>
+
+                        <td class="text-end">
+                            {{ item.cantidad }}
+                        </td>
+
+                        <td class="text-end">
+
+                            {% if venta.moneda == "PEN" %}
+                                S/
+                            {% else %}
+                                US$
+                            {% endif %}
+
+                            {{
+                                "%.2f"|format(
+                                    item.precio_unitario
+                                )
+                            }}
+
+                        </td>
+
+                        <td class="text-end">
+
+                            {% if venta.moneda == "PEN" %}
+                                S/
+                            {% else %}
+                                US$
+                            {% endif %}
+
+                            {{
+                                "%.2f"|format(
+                                    item.subtotal
+                                )
+                            }}
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     TOTALES
+====================================================== -->
+
+<div class="row justify-content-end">
+
+    <div class="col-lg-5">
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body">
+
+
+                <div
+                    class="d-flex justify-content-between mb-2"
+                >
+
+                    <span>
+                        Subtotal
+                    </span>
+
+                    <span>
+
+                        {% if venta.moneda == "PEN" %}
+                            S/
+                        {% else %}
+                            US$
+                        {% endif %}
+
+                        {{
+                            "%.2f"|format(
+                                venta.subtotal
+                            )
+                        }}
+
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="d-flex justify-content-between mb-2"
+                >
+
+                    <span>
+                        IGV incluido (18%)
+                    </span>
+
+                    <span>
+
+                        {% if venta.moneda == "PEN" %}
+                            S/
+                        {% else %}
+                            US$
+                        {% endif %}
+
+                        {{
+                            "%.2f"|format(
+                                igv
+                            )
+                        }}
+
+                    </span>
+
+                </div>
+
+
+                <hr>
+
+
+                <div
+                    class="d-flex justify-content-between"
+                >
+
+                    <strong>
+                        TOTAL
+                    </strong>
+
+                    <strong class="fs-4">
+
+                        {% if venta.moneda == "PEN" %}
+                            S/
+                        {% else %}
+                            US$
+                        {% endif %}
+
+                        {{
+                            "%.2f"|format(
+                                venta.total
+                            )
+                        }}
+
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% endblock %}

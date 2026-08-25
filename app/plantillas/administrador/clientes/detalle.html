@@ -1,0 +1,356 @@
+{% extends "administrador/base.html" %}
+
+
+{% block titulo %}
+Detalle Cliente
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<div
+    class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"
+>
+
+    <div>
+
+        <h1 class="h3 mb-1">
+            Detalle del cliente
+        </h1>
+
+        <p class="text-muted mb-0">
+            {{ nombre_cliente }}
+        </p>
+
+    </div>
+
+
+    <div class="d-flex gap-2">
+
+        <a
+            href="{{ url_for(
+                'clientes.lista'
+            ) }}"
+            class="btn btn-outline-secondary"
+        >
+            Volver
+        </a>
+
+
+        <a
+            href="{{ url_for(
+                'clientes.editar',
+                id_cliente=cliente.id_cliente
+            ) }}"
+            class="btn btn-primary"
+        >
+
+            <i class="bi bi-pencil me-1"></i>
+
+            Editar
+
+        </a>
+
+    </div>
+
+</div>
+
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body p-4">
+
+        <div class="row g-4">
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Cliente
+                </small>
+
+                <div class="fw-semibold">
+
+                    {{ nombre_cliente }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <small class="text-muted">
+                    Tipo de documento
+                </small>
+
+                <div>
+
+                    {% if cliente.numero_documento %}
+
+                        {{ cliente.tipo_documento.value }}
+
+                    {% else %}
+
+                        Sin documento
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <small class="text-muted">
+                    Número
+                </small>
+
+                <div>
+
+                    {{
+                        cliente.numero_documento
+                        or "No registrado"
+                    }}
+
+                </div>
+
+            </div>
+
+
+            {% if cliente.nombres %}
+
+                <div class="col-md-6">
+
+                    <small class="text-muted">
+                        Nombres
+                    </small>
+
+                    <div>
+                        {{ cliente.nombres }}
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <small class="text-muted">
+                        Apellidos
+                    </small>
+
+                    <div>
+                        {{ cliente.apellidos or "No registrados" }}
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+            {% if cliente.razon_social %}
+
+                <div class="col-md-12">
+
+                    <small class="text-muted">
+                        Razón social
+                    </small>
+
+                    <div>
+                        {{ cliente.razon_social }}
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Correo
+                </small>
+
+                <div>
+                    {{ cliente.correo or "No registrado" }}
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Celular
+                </small>
+
+                <div>
+                    {{ cliente.celular or "No registrado" }}
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Teléfono
+                </small>
+
+                <div>
+                    {{ cliente.telefono or "No registrado" }}
+                </div>
+
+            </div>
+
+
+            <div class="col-md-12">
+
+                <small class="text-muted">
+                    Dirección
+                </small>
+
+                <div>
+                    {{ cliente.direccion or "No registrada" }}
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Origen de identidad
+                </small>
+
+                <div>
+
+                    {% if cliente.datos_obtenidos_api %}
+
+                        <span class="badge text-bg-info">
+                            APIS.NET
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge text-bg-light">
+                            Registro manual
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Dirección Geoapify
+                </small>
+
+                <div>
+
+                    {% if cliente.geoapify_place_id %}
+
+                        <span class="badge text-bg-success">
+                            Geoapify
+                        </span>
+
+                    {% else %}
+
+                        <span class="text-muted">
+                            No utilizada
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Estado
+                </small>
+
+                <div>
+
+                    {% if cliente.activo %}
+
+                        <span class="badge text-bg-success">
+                            Activo
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge text-bg-secondary">
+                            Inactivo
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Fecha de registro
+                </small>
+
+                <div>
+
+                    {{
+                        cliente.creado_en.strftime(
+                            "%d/%m/%Y %H:%M"
+                        )
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Última consulta API
+                </small>
+
+                <div>
+
+                    {% if cliente.api_consultada_en %}
+
+                        {{
+                            cliente.api_consultada_en.strftime(
+                                "%d/%m/%Y %H:%M"
+                            )
+                        }}
+
+                    {% else %}
+
+                        No registrada
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% endblock %}

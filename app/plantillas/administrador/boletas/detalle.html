@@ -1,0 +1,668 @@
+{% extends "administrador/base.html" %}
+
+
+{% block titulo %}
+Detalle Boleta
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<div
+    class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"
+>
+
+    <div>
+
+        <h1 class="h3 mb-1">
+            {{ numero_boleta }}
+        </h1>
+
+        <p class="text-muted mb-0">
+            Comprobante electrónico NubeFact
+        </p>
+
+    </div>
+
+
+    <div class="d-flex gap-2 flex-wrap">
+
+        <a
+            href="{{ url_for(
+                'boletas_admin.lista'
+            ) }}"
+            class="btn btn-outline-secondary"
+        >
+            Volver
+        </a>
+
+
+        {% if boleta.enlace_pdf %}
+
+            <a
+                href="{{ boleta.enlace_pdf }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-outline-primary"
+            >
+
+                <i class="bi bi-file-earmark-pdf me-1"></i>
+
+                Visualizar PDF
+
+            </a>
+
+
+            <a
+                href="{{ url_for(
+                    'boletas_admin.descargar',
+                    id_boleta=boleta.id_boleta,
+                    tipo='pdf'
+                ) }}"
+                class="btn btn-success"
+            >
+
+                <i class="bi bi-download me-1"></i>
+
+                Descargar PDF
+
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body p-4">
+
+        <div class="row g-4">
+
+
+            <div class="col-md-3">
+
+                <small class="text-muted">
+                    Estado
+                </small>
+
+                <div class="fw-semibold">
+                    {{ estado }}
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <small class="text-muted">
+                    Serie
+                </small>
+
+                <div>
+                    {{ boleta.serie or "Pendiente" }}
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <small class="text-muted">
+                    Número
+                </small>
+
+                <div>
+                    {{ boleta.numero or "Pendiente" }}
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <small class="text-muted">
+                    Fecha de emisión
+                </small>
+
+                <div>
+
+                    {% if boleta.fecha_emision %}
+
+                        {{
+                            boleta.fecha_emision.strftime(
+                                "%d/%m/%Y"
+                            )
+                        }}
+
+                    {% else %}
+
+                        Pendiente
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Cliente
+                </small>
+
+                <div class="fw-semibold">
+                    {{ boleta.cliente_nombre }}
+                </div>
+
+                {% if boleta.cliente_numero_documento %}
+
+                    <small class="text-muted">
+
+                        {{ boleta.cliente_numero_documento }}
+
+                    </small>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Vendedor
+                </small>
+
+                <div class="fw-semibold">
+                    {{ nombre_vendedor }}
+                </div>
+
+                <small class="text-muted">
+                    {{ vendedor.correo }}
+                </small>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Venta
+                </small>
+
+                <div>
+                    {{ venta.numero_venta }}
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Cotización origen
+                </small>
+
+                <div>
+
+                    {% if cotizacion %}
+
+                        {{ cotizacion.numero_cotizacion }}
+
+                    {% else %}
+
+                        No disponible
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Identificador NubeFact
+                </small>
+
+                <div>
+
+                    {{
+                        boleta.identificador_nubefact
+                        or "No registrado"
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Dirección del cliente
+                </small>
+
+                <div>
+
+                    {{
+                        boleta.cliente_direccion
+                        or "No registrada"
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Correo del cliente
+                </small>
+
+                <div>
+
+                    {{
+                        boleta.cliente_correo
+                        or "No registrado"
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Moneda
+                </small>
+
+                <div>
+                    {{ moneda }}
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Total
+                </small>
+
+                <div class="fw-bold fs-5">
+
+                    {% if moneda == "PEN" %}
+                        S/
+                    {% else %}
+                        US$
+                    {% endif %}
+
+                    {{
+                        "%.2f"|format(
+                            boleta.total
+                        )
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Generada en
+                </small>
+
+                <div>
+
+                    {% if boleta.generada_en %}
+
+                        {{
+                            boleta.generada_en.strftime(
+                                "%d/%m/%Y %H:%M"
+                            )
+                        }}
+
+                    {% else %}
+
+                        Pendiente
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            {% if boleta.mensaje_nubefact %}
+
+                <div class="col-12">
+
+                    <small class="text-muted">
+                        Mensaje NubeFact
+                    </small>
+
+                    <div>
+                        {{ boleta.mensaje_nubefact }}
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- DOCUMENTOS -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-header bg-white">
+
+        <strong>
+            Documentos electrónicos
+        </strong>
+
+    </div>
+
+
+    <div class="card-body">
+
+        <div class="row g-3">
+
+
+            <div class="col-md-4">
+
+                <div class="border rounded p-3 h-100">
+
+                    <i class="bi bi-file-earmark-pdf fs-3"></i>
+
+                    <h6 class="mt-2">
+                        PDF
+                    </h6>
+
+
+                    {% if boleta.enlace_pdf %}
+
+                        <a
+                            href="{{ boleta.enlace_pdf }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn btn-sm btn-outline-primary me-1"
+                        >
+                            Ver
+                        </a>
+
+                        <a
+                            href="{{ url_for(
+                                'boletas_admin.descargar',
+                                id_boleta=boleta.id_boleta,
+                                tipo='pdf'
+                            ) }}"
+                            class="btn btn-sm btn-outline-success"
+                        >
+                            Descargar
+                        </a>
+
+                    {% else %}
+
+                        <span class="text-muted">
+                            No disponible
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <div class="border rounded p-3 h-100">
+
+                    <i class="bi bi-filetype-xml fs-3"></i>
+
+                    <h6 class="mt-2">
+                        XML
+                    </h6>
+
+
+                    {% if boleta.enlace_xml %}
+
+                        <a
+                            href="{{ boleta.enlace_xml }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn btn-sm btn-outline-primary me-1"
+                        >
+                            Ver
+                        </a>
+
+                        <a
+                            href="{{ url_for(
+                                'boletas_admin.descargar',
+                                id_boleta=boleta.id_boleta,
+                                tipo='xml'
+                            ) }}"
+                            class="btn btn-sm btn-outline-success"
+                        >
+                            Descargar
+                        </a>
+
+                    {% else %}
+
+                        <span class="text-muted">
+                            No disponible
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <div class="border rounded p-3 h-100">
+
+                    <i class="bi bi-file-earmark-zip fs-3"></i>
+
+                    <h6 class="mt-2">
+                        CDR
+                    </h6>
+
+
+                    {% if boleta.enlace_cdr %}
+
+                        <a
+                            href="{{ url_for(
+                                'boletas_admin.descargar',
+                                id_boleta=boleta.id_boleta,
+                                tipo='cdr'
+                            ) }}"
+                            class="btn btn-sm btn-outline-success"
+                        >
+                            Descargar
+                        </a>
+
+                    {% else %}
+
+                        <span class="text-muted">
+                            No disponible
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- PRODUCTOS -->
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-header bg-white">
+
+        <strong>
+            Detalle de la venta
+        </strong>
+
+    </div>
+
+
+    <div class="table-responsive">
+
+        <table class="table mb-0">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Código
+                    </th>
+
+                    <th>
+                        Producto
+                    </th>
+
+                    <th class="text-end">
+                        Cantidad
+                    </th>
+
+                    <th class="text-end">
+                        Precio unitario
+                    </th>
+
+                    <th class="text-end">
+                        Subtotal
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+            {% for detalle in detalles %}
+
+                <tr>
+
+                    <td>
+                        {{ detalle.codigo_producto }}
+                    </td>
+
+                    <td>
+                        {{ detalle.nombre_producto }}
+                    </td>
+
+                    <td class="text-end">
+                        {{ detalle.cantidad }}
+                    </td>
+
+                    <td class="text-end">
+
+                        {% if moneda == "PEN" %}
+                            S/
+                        {% else %}
+                            US$
+                        {% endif %}
+
+                        {{
+                            "%.2f"|format(
+                                detalle.precio_unitario
+                            )
+                        }}
+
+                    </td>
+
+                    <td class="text-end">
+
+                        {% if moneda == "PEN" %}
+                            S/
+                        {% else %}
+                            US$
+                        {% endif %}
+
+                        {{
+                            "%.2f"|format(
+                                detalle.subtotal
+                            )
+                        }}
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+
+            </tbody>
+
+
+            <tfoot>
+
+                <tr>
+
+                    <td
+                        colspan="4"
+                        class="text-end fw-semibold"
+                    >
+                        TOTAL
+                    </td>
+
+                    <td class="text-end fw-bold">
+
+                        {% if moneda == "PEN" %}
+                            S/
+                        {% else %}
+                            US$
+                        {% endif %}
+
+                        {{
+                            "%.2f"|format(
+                                boleta.total
+                            )
+                        }}
+
+                    </td>
+
+                </tr>
+
+            </tfoot>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+{% endblock %}

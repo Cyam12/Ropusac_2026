@@ -1,0 +1,36 @@
+{% extends "administrador/base.html" %}
+
+
+{% block titulo %}
+{{ titulo }}
+{% endblock %}
+
+
+{% block contenido %}
+
+<div class="mb-4">
+
+    <h1 class="h3 mb-1">
+        {{ titulo }}
+    </h1>
+
+    <p class="text-muted">
+        {{ descripcion }}
+    </p>
+
+</div>
+
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body p-4">
+
+        <p class="mb-0 text-muted">
+            Este módulo será desarrollado en los siguientes pasos.
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

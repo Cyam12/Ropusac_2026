@@ -1,0 +1,1383 @@
+{% extends "administrador/base.html" %}
+
+
+{% block titulo %}
+
+    {% if cliente %}
+        Editar Cliente
+    {% else %}
+        Nuevo Cliente
+    {% endif %}
+
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<div class="mb-4">
+
+    <h1 class="h3 mb-1">
+
+        {% if cliente %}
+            Editar cliente
+        {% else %}
+            Registrar cliente
+        {% endif %}
+
+    </h1>
+
+</div>
+
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body p-4">
+
+
+        <form method="POST">
+
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="datos_obtenidos_api"
+                id="datosObtenidosApi"
+                value="{{
+                    request.form.get(
+                        'datos_obtenidos_api',
+                        '1'
+                        if cliente and cliente.datos_obtenidos_api
+                        else '0'
+                    )
+                }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="geoapify_place_id"
+                id="geoapifyPlaceId"
+                value="{{
+                    request.form.get(
+                        'geoapify_place_id',
+                        cliente.geoapify_place_id
+                        if cliente and cliente.geoapify_place_id
+                        else ''
+                    )
+                }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="latitud"
+                id="latitud"
+                value="{{
+                    request.form.get(
+                        'latitud',
+                        cliente.latitud
+                        if cliente and cliente.latitud is not none
+                        else ''
+                    )
+                }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="longitud"
+                id="longitud"
+                value="{{
+                    request.form.get(
+                        'longitud',
+                        cliente.longitud
+                        if cliente and cliente.longitud is not none
+                        else ''
+                    )
+                }}"
+            >
+
+
+            <div class="row g-3">
+
+
+                <!-- TIPO DOCUMENTO -->
+
+                <div class="col-md-4">
+
+                    <label
+                        for="tipoDocumento"
+                        class="form-label"
+                    >
+                        Tipo de documento
+                    </label>
+
+
+                    {% set tipo_actual =
+                        request.form.get(
+                            'tipo_documento'
+                        )
+                        if request.method == 'POST'
+                        else (
+                            cliente.tipo_documento.value
+                            if cliente
+                            else 'DNI'
+                        )
+                    %}
+
+
+                    <select
+                        class="form-select"
+                        name="tipo_documento"
+                        id="tipoDocumento"
+                        required
+                    >
+
+                        <option
+                            value="DNI"
+                            {% if tipo_actual == 'DNI' %}
+                                selected
+                            {% endif %}
+                        >
+                            DNI
+                        </option>
+
+
+                        <option
+                            value="RUC"
+                            {% if tipo_actual == 'RUC' %}
+                                selected
+                            {% endif %}
+                        >
+                            RUC
+                        </option>
+
+
+                        <option
+                            value="SIN_DOCUMENTO"
+                            {% if tipo_actual == 'SIN_DOCUMENTO' %}
+                                selected
+                            {% endif %}
+                        >
+                            Sin documento
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- DOCUMENTO -->
+
+                <div
+                    class="col-md-8"
+                    id="contenedorDocumento"
+                >
+
+                    <label
+                        for="numeroDocumento"
+                        class="form-label"
+                        id="etiquetaDocumento"
+                    >
+                        Documento
+                    </label>
+
+
+                    <div class="input-group">
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="numero_documento"
+                            id="numeroDocumento"
+                            inputmode="numeric"
+
+                            value="{{
+                                request.form.get(
+                                    'numero_documento',
+                                    cliente.numero_documento
+                                    if cliente and cliente.numero_documento
+                                    else ''
+                                )
+                            }}"
+                        >
+
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary"
+                            id="botonConsultarDocumento"
+                        >
+
+                            <i class="bi bi-search"></i>
+
+                            Consultar
+
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        class="form-text"
+                        id="informacionDocumento"
+                    >
+                        Consulta mediante APIS.NET.
+                    </div>
+
+                </div>
+
+
+                <!-- PERSONA -->
+
+                <div
+                    class="col-md-6 campo-persona"
+                >
+
+                    <label
+                        for="nombres"
+                        class="form-label"
+                    >
+                        Nombres
+                    </label>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="nombres"
+                        id="nombres"
+                        maxlength="150"
+
+                        value="{{
+                            request.form.get(
+                                'nombres',
+                                cliente.nombres
+                                if cliente and cliente.nombres
+                                else ''
+                            )
+                        }}"
+                    >
+
+                </div>
+
+
+                <div
+                    class="col-md-6 campo-persona"
+                >
+
+                    <label
+                        for="apellidos"
+                        class="form-label"
+                    >
+                        Apellidos
+                    </label>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="apellidos"
+                        id="apellidos"
+                        maxlength="150"
+
+                        value="{{
+                            request.form.get(
+                                'apellidos',
+                                cliente.apellidos
+                                if cliente and cliente.apellidos
+                                else ''
+                            )
+                        }}"
+                    >
+
+                </div>
+
+
+                <!-- EMPRESA -->
+
+                <div
+                    class="col-12 campo-empresa"
+                >
+
+                    <label
+                        for="razonSocial"
+                        class="form-label"
+                    >
+                        Razón social
+                    </label>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="razon_social"
+                        id="razonSocial"
+                        maxlength="200"
+
+                        value="{{
+                            request.form.get(
+                                'razon_social',
+                                cliente.razon_social
+                                if cliente and cliente.razon_social
+                                else ''
+                            )
+                        }}"
+                    >
+
+                </div>
+
+
+                <!-- CONTACTO -->
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+                        Correo electrónico
+                    </label>
+
+                    <input
+                        type="email"
+                        class="form-control"
+                        name="correo"
+                        maxlength="180"
+
+                        value="{{
+                            request.form.get(
+                                'correo',
+                                cliente.correo
+                                if cliente and cliente.correo
+                                else ''
+                            )
+                        }}"
+                    >
+
+                </div>
+
+
+                <div class="col-md-3">
+
+                    <label class="form-label">
+                        Celular
+                    </label>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="celular"
+                        maxlength="30"
+
+                        value="{{
+                            request.form.get(
+                                'celular',
+                                cliente.celular
+                                if cliente and cliente.celular
+                                else ''
+                            )
+                        }}"
+                    >
+
+                </div>
+
+
+                <div class="col-md-3">
+
+                    <label class="form-label">
+                        Teléfono
+                    </label>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="telefono"
+                        maxlength="30"
+
+                        value="{{
+                            request.form.get(
+                                'telefono',
+                                cliente.telefono
+                                if cliente and cliente.telefono
+                                else ''
+                            )
+                        }}"
+                    >
+
+                </div>
+
+
+                <!-- DIRECCION -->
+
+                <div class="col-12">
+
+                    <label
+                        for="direccionCliente"
+                        class="form-label"
+                    >
+                        Dirección
+                    </label>
+
+
+                    <div class="position-relative">
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="direccion"
+                            id="direccionCliente"
+                            maxlength="300"
+                            autocomplete="off"
+
+                            value="{{
+                                request.form.get(
+                                    'direccion',
+                                    cliente.direccion
+                                    if cliente and cliente.direccion
+                                    else ''
+                                )
+                            }}"
+                        >
+
+
+                        <div
+                            id="resultadosDireccion"
+                            class="list-group position-absolute w-100 shadow"
+                            style="z-index: 1050;"
+                        ></div>
+
+                    </div>
+
+
+                    <div
+                        class="form-text"
+                        id="ayudaDireccion"
+                    >
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <hr class="my-4">
+
+
+            <div
+                class="d-flex justify-content-end gap-2"
+            >
+
+                <a
+                    href="{{ url_for(
+                        'clientes.lista'
+                    ) }}"
+                    class="btn btn-outline-secondary"
+                >
+                    Cancelar
+                </a>
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+
+                    <i class="bi bi-save me-1"></i>
+
+                    Guardar
+
+                </button>
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+</div>
+
+
+{% endblock %}
+
+
+{% block scripts %}
+
+
+<script>
+
+
+    // =====================================================
+    // ELEMENTOS
+    // =====================================================
+
+
+    const tipoDocumento =
+        document.getElementById(
+            "tipoDocumento"
+        );
+
+
+    const contenedorDocumento =
+        document.getElementById(
+            "contenedorDocumento"
+        );
+
+
+    const numeroDocumento =
+        document.getElementById(
+            "numeroDocumento"
+        );
+
+
+    const etiquetaDocumento =
+        document.getElementById(
+            "etiquetaDocumento"
+        );
+
+
+    const botonConsultarDocumento =
+        document.getElementById(
+            "botonConsultarDocumento"
+        );
+
+
+    const informacionDocumento =
+        document.getElementById(
+            "informacionDocumento"
+        );
+
+
+    const camposPersona =
+        document.querySelectorAll(
+            ".campo-persona"
+        );
+
+
+    const campoEmpresa =
+        document.querySelector(
+            ".campo-empresa"
+        );
+
+
+    const nombres =
+        document.getElementById(
+            "nombres"
+        );
+
+
+    const apellidos =
+        document.getElementById(
+            "apellidos"
+        );
+
+
+    const razonSocial =
+        document.getElementById(
+            "razonSocial"
+        );
+
+
+    const datosObtenidosApi =
+        document.getElementById(
+            "datosObtenidosApi"
+        );
+
+
+    const direccion =
+        document.getElementById(
+            "direccionCliente"
+        );
+
+
+    const resultadosDireccion =
+        document.getElementById(
+            "resultadosDireccion"
+        );
+
+
+    const ayudaDireccion =
+        document.getElementById(
+            "ayudaDireccion"
+        );
+
+
+    const geoapifyPlaceId =
+        document.getElementById(
+            "geoapifyPlaceId"
+        );
+
+
+    const latitud =
+        document.getElementById(
+            "latitud"
+        );
+
+
+    const longitud =
+        document.getElementById(
+            "longitud"
+        );
+
+
+    // =====================================================
+    // CAMBIAR TIPO
+    // =====================================================
+
+
+    function actualizarTipoDocumento() {
+
+
+        const tipo =
+            tipoDocumento.value;
+
+
+        if (
+            tipo === "DNI"
+        ) {
+
+
+            contenedorDocumento.style.display =
+                "";
+
+
+            etiquetaDocumento.textContent =
+                "DNI";
+
+
+            numeroDocumento.maxLength =
+                8;
+
+
+            camposPersona.forEach(
+                campo => {
+
+                    campo.style.display =
+                        "";
+
+                }
+            );
+
+
+            campoEmpresa.style.display =
+                "none";
+
+
+            ayudaDireccion.textContent =
+                "Escriba la dirección para buscar mediante Geoapify.";
+
+
+        }
+
+        else if (
+            tipo === "RUC"
+        ) {
+
+
+            contenedorDocumento.style.display =
+                "";
+
+
+            etiquetaDocumento.textContent =
+                "RUC";
+
+
+            numeroDocumento.maxLength =
+                11;
+
+
+            camposPersona.forEach(
+                campo => {
+
+                    campo.style.display =
+                        "none";
+
+                }
+            );
+
+
+            campoEmpresa.style.display =
+                "";
+
+
+            ayudaDireccion.textContent =
+                "La dirección puede completarse automáticamente con APIS.NET.";
+
+
+            resultadosDireccion.innerHTML =
+                "";
+
+
+            geoapifyPlaceId.value =
+                "";
+
+
+            latitud.value =
+                "";
+
+
+            longitud.value =
+                "";
+
+
+        }
+
+        else {
+
+
+            contenedorDocumento.style.display =
+                "none";
+
+
+            numeroDocumento.value =
+                "";
+
+
+            numeroDocumento.maxLength =
+                11;
+
+
+            datosObtenidosApi.value =
+                "0";
+
+
+            camposPersona.forEach(
+                campo => {
+
+                    campo.style.display =
+                        "";
+
+                }
+            );
+
+
+            campoEmpresa.style.display =
+                "";
+
+
+            ayudaDireccion.textContent =
+                "Puede registrar una persona o empresa sin documento. "
+                + "La dirección utiliza Geoapify.";
+
+
+        }
+
+
+    }
+
+
+    tipoDocumento.addEventListener(
+        "change",
+        function () {
+
+
+            datosObtenidosApi.value =
+                "0";
+
+
+            actualizarTipoDocumento();
+
+
+        }
+    );
+
+
+    actualizarTipoDocumento();
+
+
+    // =====================================================
+    // DOCUMENTO NUMERICO
+    // =====================================================
+
+
+    numeroDocumento.addEventListener(
+        "input",
+        function () {
+
+
+            datosObtenidosApi.value =
+                "0";
+
+
+            const limite =
+                tipoDocumento.value === "DNI"
+                    ? 8
+                    : 11;
+
+
+            numeroDocumento.value =
+                numeroDocumento.value
+                    .replace(
+                        /\D/g,
+                        ""
+                    )
+                    .slice(
+                        0,
+                        limite
+                    );
+
+
+        }
+    );
+
+
+    // =====================================================
+    // DATOS IDENTIDAD MODIFICADOS
+    // =====================================================
+
+
+    nombres.addEventListener(
+        "input",
+        function () {
+
+            if (
+                tipoDocumento.value
+                === "DNI"
+            ) {
+
+                datosObtenidosApi.value =
+                    "0";
+
+            }
+
+        }
+    );
+
+
+    apellidos.addEventListener(
+        "input",
+        function () {
+
+            if (
+                tipoDocumento.value
+                === "DNI"
+            ) {
+
+                datosObtenidosApi.value =
+                    "0";
+
+            }
+
+        }
+    );
+
+
+    razonSocial.addEventListener(
+        "input",
+        function () {
+
+            if (
+                tipoDocumento.value
+                === "RUC"
+            ) {
+
+                datosObtenidosApi.value =
+                    "0";
+
+            }
+
+        }
+    );
+
+
+    // =====================================================
+    // CONSULTAR DNI / RUC
+    // =====================================================
+
+
+    botonConsultarDocumento.addEventListener(
+        "click",
+        async function () {
+
+
+            const tipo =
+                tipoDocumento.value;
+
+
+            const documento =
+                numeroDocumento.value.trim();
+
+
+            if (
+                tipo === "DNI"
+                &&
+                !/^\d{8}$/.test(
+                    documento
+                )
+            ) {
+
+                alert(
+                    "Ingrese un DNI válido de 8 dígitos."
+                );
+
+                return;
+
+            }
+
+
+            if (
+                tipo === "RUC"
+                &&
+                !/^\d{11}$/.test(
+                    documento
+                )
+            ) {
+
+                alert(
+                    "Ingrese un RUC válido de 11 dígitos."
+                );
+
+                return;
+
+            }
+
+
+            const textoOriginal =
+                botonConsultarDocumento.innerHTML;
+
+
+            botonConsultarDocumento.disabled =
+                true;
+
+
+            botonConsultarDocumento.innerHTML =
+                `
+                    <span
+                        class="spinner-border spinner-border-sm me-1"
+                    ></span>
+                    Consultando
+                `;
+
+
+            informacionDocumento.textContent =
+                "Consultando información...";
+
+
+            try {
+
+
+                let url;
+
+
+                if (
+                    tipo === "DNI"
+                ) {
+
+                    url =
+                        `/integraciones/dni/${documento}?entidad=clientes`;
+
+                }
+
+                else {
+
+                    url =
+                        `/integraciones/ruc/${documento}?entidad=clientes`;
+
+                }
+
+
+                const respuesta =
+                    await fetch(
+                        url
+                    );
+
+
+                const datos =
+                    await respuesta.json();
+
+
+                if (
+                    !respuesta.ok
+                    || !datos.exito
+                ) {
+
+                    throw new Error(
+                        datos.mensaje
+                        || "No se pudo realizar la consulta."
+                    );
+
+                }
+
+
+                // =========================================
+                // DNI
+                // =========================================
+
+
+                if (
+                    tipo === "DNI"
+                ) {
+
+
+                    nombres.value =
+                        datos.nombres
+                        || "";
+
+
+                    apellidos.value =
+                        datos.apellidos
+                        || "";
+
+
+                    informacionDocumento.textContent =
+                        "DNI consultado correctamente.";
+
+
+                }
+
+
+                // =========================================
+                // RUC
+                // =========================================
+
+
+                else {
+
+
+                    razonSocial.value =
+                        datos.razon_social
+                        || "";
+
+
+                    direccion.value =
+                        datos.direccion
+                        || "";
+
+
+                    let informacion =
+                        [];
+
+
+                    if (
+                        datos.estado
+                    ) {
+
+                        informacion.push(
+                            `Estado: ${datos.estado}`
+                        );
+
+                    }
+
+
+                    if (
+                        datos.condicion
+                    ) {
+
+                        informacion.push(
+                            `Condición: ${datos.condicion}`
+                        );
+
+                    }
+
+
+                    informacionDocumento.textContent =
+                        informacion.length
+                        ? informacion.join(
+                            " | "
+                        )
+                        : "RUC consultado correctamente.";
+
+
+                }
+
+
+                datosObtenidosApi.value =
+                    "1";
+
+
+            }
+
+            catch (
+                error
+            ) {
+
+
+                datosObtenidosApi.value =
+                    "0";
+
+
+                informacionDocumento.textContent =
+                    "No se pudo completar la consulta.";
+
+
+                alert(
+                    error.message
+                );
+
+
+            }
+
+            finally {
+
+
+                botonConsultarDocumento.disabled =
+                    false;
+
+
+                botonConsultarDocumento.innerHTML =
+                    textoOriginal;
+
+
+            }
+
+
+        }
+    );
+
+
+    // =====================================================
+    // GEOAPIFY
+    // SOLO DNI Y SIN DOCUMENTO
+    // =====================================================
+
+
+    let temporizadorDireccion;
+
+
+    direccion.addEventListener(
+        "input",
+        function () {
+
+
+            if (
+                tipoDocumento.value
+                === "RUC"
+            ) {
+
+                resultadosDireccion.innerHTML =
+                    "";
+
+                return;
+
+            }
+
+
+            clearTimeout(
+                temporizadorDireccion
+            );
+
+
+            geoapifyPlaceId.value =
+                "";
+
+
+            latitud.value =
+                "";
+
+
+            longitud.value =
+                "";
+
+
+            const texto =
+                direccion.value.trim();
+
+
+            if (
+                texto.length < 3
+            ) {
+
+
+                resultadosDireccion.innerHTML =
+                    "";
+
+                return;
+
+
+            }
+
+
+            temporizadorDireccion =
+                setTimeout(
+                    function () {
+
+                        buscarDireccion(
+                            texto
+                        );
+
+                    },
+                    400
+                );
+
+
+        }
+    );
+
+
+    async function buscarDireccion(
+        texto
+    ) {
+
+
+        try {
+
+
+            const respuesta =
+                await fetch(
+                    `/integraciones/direcciones?q=${
+                        encodeURIComponent(
+                            texto
+                        )
+                    }&entidad=clientes`
+                );
+
+
+            const datos =
+                await respuesta.json();
+
+
+            if (
+                !respuesta.ok
+                || !datos.exito
+            ) {
+
+
+                resultadosDireccion.innerHTML =
+                    "";
+
+                return;
+
+
+            }
+
+
+            mostrarDirecciones(
+                datos.resultados
+            );
+
+
+        }
+
+        catch (
+            error
+        ) {
+
+
+            resultadosDireccion.innerHTML =
+                "";
+
+
+        }
+
+
+    }
+
+
+    function mostrarDirecciones(
+        resultados
+    ) {
+
+
+        resultadosDireccion.innerHTML =
+            "";
+
+
+        resultados.forEach(
+            function (
+                resultado
+            ) {
+
+
+                const boton =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                boton.type =
+                    "button";
+
+
+                boton.className =
+                    "list-group-item "
+                    + "list-group-item-action";
+
+
+                boton.textContent =
+                    resultado.direccion;
+
+
+                boton.addEventListener(
+                    "click",
+                    function () {
+
+
+                        direccion.value =
+                            resultado.direccion;
+
+
+                        geoapifyPlaceId.value =
+                            resultado.place_id
+                            || "";
+
+
+                        latitud.value =
+                            resultado.latitud
+                            ?? "";
+
+
+                        longitud.value =
+                            resultado.longitud
+                            ?? "";
+
+
+                        resultadosDireccion.innerHTML =
+                            "";
+
+
+                    }
+                );
+
+
+                resultadosDireccion.appendChild(
+                    boton
+                );
+
+
+            }
+        );
+
+
+    }
+
+
+    // =====================================================
+    // CERRAR AUTOCOMPLETADO
+    // =====================================================
+
+
+    document.addEventListener(
+        "click",
+        function (
+            evento
+        ) {
+
+
+            if (
+                !resultadosDireccion.contains(
+                    evento.target
+                )
+                &&
+                evento.target !== direccion
+            ) {
+
+
+                resultadosDireccion.innerHTML =
+                    "";
+
+
+            }
+
+
+        }
+    );
+
+
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,459 @@
+{% extends "vendedor/base.html" %}
+
+
+{% block titulo %}
+Editar Contacto
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<div class="mb-4">
+
+    <h1 class="h3 mb-1">
+        Editar contacto
+    </h1>
+
+    <p class="text-muted mb-0">
+
+        {{ nombre_cliente }}
+
+    </p>
+
+</div>
+
+
+<div
+    class="alert alert-info border-0 shadow-sm"
+>
+
+    <i class="bi bi-lock me-2"></i>
+
+    Como vendedor solo puede modificar
+    el correo electrónico, celular y dirección del cliente.
+
+</div>
+
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body p-4">
+
+
+        <!-- IDENTIDAD SOLO LECTURA -->
+
+        <div class="row g-3 mb-4">
+
+
+            <div class="col-md-4">
+
+                <label class="form-label">
+                    Documento
+                </label>
+
+                <input
+                    type="text"
+                    class="form-control"
+                    value="{{ cliente.tipo_documento.value }}"
+                    disabled
+                >
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <label class="form-label">
+                    Número
+                </label>
+
+                <input
+                    type="text"
+                    class="form-control"
+                    value="{{ cliente.numero_documento or 'Sin documento' }}"
+                    disabled
+                >
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <label class="form-label">
+                    Cliente
+                </label>
+
+                <input
+                    type="text"
+                    class="form-control"
+                    value="{{ nombre_cliente }}"
+                    disabled
+                >
+
+            </div>
+
+
+        </div>
+
+
+        <hr>
+
+
+        <form method="POST">
+
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="geoapify_place_id"
+                id="geoapifyPlaceId"
+                value="{{ cliente.geoapify_place_id or '' }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="latitud"
+                id="latitud"
+                value="{{ cliente.latitud or '' }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="longitud"
+                id="longitud"
+                value="{{ cliente.longitud or '' }}"
+            >
+
+
+            <div class="row g-3">
+
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+
+                        Correo electrónico
+
+                    </label>
+
+                    <input
+                        type="email"
+                        class="form-control"
+                        name="correo"
+
+                        maxlength="180"
+
+                        value="{{ cliente.correo or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+
+                        Celular
+
+                    </label>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="celular"
+
+                        maxlength="30"
+
+                        value="{{ cliente.celular or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="col-12">
+
+                    <label class="form-label">
+
+                        Dirección
+
+                    </label>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="direccion"
+                        id="direccion"
+
+                        autocomplete="off"
+
+                        maxlength="300"
+
+                        value="{{ cliente.direccion or '' }}"
+                    >
+
+
+                    {% if
+                        cliente.tipo_documento.value
+                        in ["DNI", "SIN_DOCUMENTO"]
+                    %}
+
+                        <div class="form-text">
+
+                            Puede buscar la dirección
+                            mediante Geoapify.
+
+                        </div>
+
+                        <div
+                            id="resultadosDireccion"
+                            class="list-group mt-2"
+                        ></div>
+
+                    {% endif %}
+
+                </div>
+
+
+            </div>
+
+
+            <hr class="my-4">
+
+
+            <div
+                class="d-flex justify-content-end gap-2"
+            >
+
+                <a
+                    href="{{ url_for(
+                        'clientes_vendedor.detalle',
+                        id_cliente=cliente.id_cliente
+                    ) }}"
+                    class="btn btn-outline-secondary"
+                >
+                    Cancelar
+                </a>
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+
+                    <i class="bi bi-save me-1"></i>
+
+                    Guardar contacto
+
+                </button>
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+</div>
+
+
+{% endblock %}
+
+
+{% block scripts %}
+
+
+{% if
+    cliente.tipo_documento.value
+    in ["DNI", "SIN_DOCUMENTO"]
+%}
+
+<script>
+
+    const direccion =
+        document.getElementById(
+            "direccion"
+        );
+
+    const resultadosDireccion =
+        document.getElementById(
+            "resultadosDireccion"
+        );
+
+    const geoapifyPlaceId =
+        document.getElementById(
+            "geoapifyPlaceId"
+        );
+
+    const latitud =
+        document.getElementById(
+            "latitud"
+        );
+
+    const longitud =
+        document.getElementById(
+            "longitud"
+        );
+
+
+    let temporizadorDireccion =
+        null;
+
+
+    direccion.addEventListener(
+        "input",
+        function () {
+
+            geoapifyPlaceId.value =
+                "";
+
+            latitud.value =
+                "";
+
+            longitud.value =
+                "";
+
+            resultadosDireccion.innerHTML =
+                "";
+
+
+            clearTimeout(
+                temporizadorDireccion
+            );
+
+
+            const consulta =
+                direccion.value.trim();
+
+
+            if (
+                consulta.length < 3
+            ) {
+
+                return;
+
+            }
+
+
+            temporizadorDireccion =
+                setTimeout(
+                    async function () {
+
+                        try {
+
+                            const respuesta =
+                                await fetch(
+                                    `/integraciones/direcciones?q=${encodeURIComponent(
+                                        consulta
+                                    )}&entidad=clientes`
+                                );
+
+
+                            const datos =
+                                await respuesta.json();
+
+
+                            if (
+                                !respuesta.ok
+                                || !datos.exito
+                            ) {
+
+                                return;
+
+                            }
+
+
+                            resultadosDireccion.innerHTML =
+                                "";
+
+
+                            for (
+                                const resultado
+                                of datos.resultados
+                            ) {
+
+                                const boton =
+                                    document.createElement(
+                                        "button"
+                                    );
+
+
+                                boton.type =
+                                    "button";
+
+
+                                boton.className =
+                                    "list-group-item list-group-item-action";
+
+
+                                boton.textContent =
+                                    resultado.direccion;
+
+
+                                boton.addEventListener(
+                                    "click",
+                                    function () {
+
+                                        direccion.value =
+                                            resultado.direccion
+                                            || "";
+
+                                        geoapifyPlaceId.value =
+                                            resultado.place_id
+                                            || "";
+
+                                        latitud.value =
+                                            resultado.latitud
+                                            ?? "";
+
+                                        longitud.value =
+                                            resultado.longitud
+                                            ?? "";
+
+                                        resultadosDireccion.innerHTML =
+                                            "";
+
+                                    }
+                                );
+
+
+                                resultadosDireccion.appendChild(
+                                    boton
+                                );
+
+                            }
+
+                        }
+
+                        catch (
+                            error
+                        ) {
+
+                            console.error(
+                                error
+                            );
+
+                        }
+
+                    },
+                    400
+                );
+
+        }
+    );
+
+</script>
+
+{% endif %}
+
+
+{% endblock %}

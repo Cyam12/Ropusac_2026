@@ -1,0 +1,379 @@
+{% extends "vendedor/base.html" %}
+
+
+{% block titulo %}
+Vendedor
+{% endblock %}
+
+
+{% block contenido %}
+
+<div class="mb-4">
+
+    <h1 class="h3 mb-1">
+        Dashboard Vendedor
+    </h1>
+
+    <p class="text-muted mb-0">
+
+        Gestión de clientes, productos,
+        cotizaciones y comprobantes.
+
+    </p>
+
+</div>
+
+
+<!-- =====================================================
+     INDICADORES
+====================================================== -->
+
+<div class="row g-4 mb-5">
+
+
+    <div class="col-md-4">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body p-4">
+
+                <div
+                    class="d-flex justify-content-between align-items-start"
+                >
+
+                    <div>
+
+                        <div class="text-muted small mb-2">
+                            Clientes
+                        </div>
+
+                        <div class="display-6 fw-semibold">
+                            {{ clientes_usuario }}
+                        </div>
+
+                        <div class="small text-muted mt-2">
+                            Creados por mí
+                        </div>
+
+                    </div>
+
+
+                    <div class="bg-light rounded p-3">
+
+                        <i
+                            class="bi bi-person-vcard fs-2"
+                        ></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body p-4">
+
+                <div
+                    class="d-flex justify-content-between align-items-start"
+                >
+
+                    <div>
+
+                        <div class="text-muted small mb-2">
+                            Cotizaciones
+                        </div>
+
+                        <div class="display-6 fw-semibold">
+                            {{ cotizaciones_usuario }}
+                        </div>
+
+                        <div class="small text-muted mt-2">
+                            Creadas por mí
+                        </div>
+
+                    </div>
+
+
+                    <div class="bg-light rounded p-3">
+
+                        <i
+                            class="bi bi-file-earmark-text fs-2"
+                        ></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body p-4">
+
+                <div
+                    class="d-flex justify-content-between align-items-start"
+                >
+
+                    <div>
+
+                        <div class="text-muted small mb-2">
+                            Boletas
+                        </div>
+
+                        <div class="display-6 fw-semibold">
+                            {{ boletas_usuario }}
+                        </div>
+
+                        <div class="small text-muted mt-2">
+                            Generadas por mí
+                        </div>
+
+                    </div>
+
+
+                    <div class="bg-light rounded p-3">
+
+                        <i
+                            class="bi bi-receipt fs-2"
+                        ></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     MODULOS
+====================================================== -->
+
+<h5 class="mb-3">
+    Gestión de Ventas
+</h5>
+
+
+<div class="row g-4">
+
+
+    <!-- CLIENTES -->
+
+    <div class="col-md-6 col-xl-4">
+
+        <a
+            href="{{ url_for(
+                'clientes_vendedor.lista'
+            ) }}"
+            class="text-decoration-none"
+        >
+
+            <div class="card tarjeta-modulo h-100">
+
+                <div class="card-body">
+
+                    <i
+                        class="bi bi-person-vcard fs-2"
+                    ></i>
+
+                    <h5 class="mt-3">
+                        Clientes
+                    </h5>
+
+                    <p class="text-muted mb-0">
+
+                        Registrar y consultar
+                        clientes del sistema.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <!-- PRODUCTOS -->
+
+    <div class="col-md-6 col-xl-4">
+
+        <a
+            href="{{ url_for(
+                'productos_vendedor.lista'
+            ) }}"
+            class="text-decoration-none"
+        >
+
+            <div class="card tarjeta-modulo h-100">
+
+                <div class="card-body">
+
+                    <i
+                        class="bi bi-box-seam fs-2"
+                    ></i>
+
+                    <h5 class="mt-3">
+                        Productos
+                    </h5>
+
+                    <p class="text-muted mb-0">
+
+                        Consultar catálogo,
+                        precios finales y disponibilidad.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <!-- COTIZACIONES -->
+
+    <div class="col-md-6 col-xl-4">
+
+        <a
+            href="{{ url_for(
+                'cotizaciones_vendedor.lista'
+            ) }}"
+            class="text-decoration-none"
+        >
+
+            <div class="card tarjeta-modulo h-100">
+
+                <div class="card-body">
+
+                    <i
+                        class="bi bi-file-earmark-text fs-2"
+                    ></i>
+
+                    <h5 class="mt-3">
+                        Cotizaciones
+                    </h5>
+
+                    <p class="text-muted mb-0">
+
+                        Crear, consultar y gestionar
+                        cotizaciones.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <!-- BOLETAS -->
+
+    <div class="col-md-6 col-xl-4">
+
+        <a
+            href="{{ url_for(
+                'boletas_vendedor.lista'
+            ) }}"
+            class="text-decoration-none"
+        >
+
+            <div class="card tarjeta-modulo h-100">
+
+                <div class="card-body">
+
+                    <i
+                        class="bi bi-receipt fs-2"
+                    ></i>
+
+                    <h5 class="mt-3">
+                        Boletas
+                    </h5>
+
+                    <p class="text-muted mb-0">
+
+                        Convertir ventas y consultar
+                        comprobantes electrónicos.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <!-- HISTORIAL -->
+
+    <div class="col-md-6 col-xl-4">
+
+        <a
+            href="{{ url_for(
+                'dashboard.vendedor_historial'
+            ) }}"
+            class="text-decoration-none"
+        >
+
+            <div class="card tarjeta-modulo h-100">
+
+                <div class="card-body">
+
+                    <i
+                        class="bi bi-clock-history fs-2"
+                    ></i>
+
+                    <h5 class="mt-3">
+                        Historial
+                    </h5>
+
+                    <p class="text-muted mb-0">
+
+                        Consultar operaciones
+                        realizadas por los vendedores.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+</div>
+
+
+{% endblock %}

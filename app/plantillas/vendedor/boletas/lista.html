@@ -1,0 +1,1098 @@
+{% extends "vendedor/base.html" %}
+
+
+{% block titulo %}
+Boletas
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<!-- =====================================================
+     CABECERA
+====================================================== -->
+
+<div class="mb-4">
+
+    <h1 class="h3 mb-1">
+        Boletas
+    </h1>
+
+    <p class="text-muted mb-0">
+
+        Aprobación de cotizaciones,
+        ventas y emisión de boletas electrónicas.
+
+    </p>
+
+</div>
+
+
+<!-- =====================================================
+     INFORMACION
+====================================================== -->
+
+<div
+    class="alert alert-info border-0 shadow-sm mb-4"
+>
+
+    <i class="bi bi-info-circle me-2"></i>
+
+    Se muestran las cotizaciones de todos los vendedores.
+    Una cotización vencida no puede convertirse en venta.
+
+</div>
+
+
+<!-- =====================================================
+     FILTROS
+====================================================== -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body">
+
+        <form
+            method="GET"
+            class="row g-2"
+        >
+
+
+            <!-- BUSQUEDA -->
+
+            <div class="col-lg-6">
+
+                <div class="input-group">
+
+                    <span
+                        class="input-group-text bg-white"
+                    >
+
+                        <i class="bi bi-search"></i>
+
+                    </span>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="buscar"
+                        value="{{ buscar }}"
+                        placeholder="Cotización, cliente, documento, vendedor o venta"
+                        autocomplete="off"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- ESTADO -->
+
+            <div class="col-lg-3">
+
+                <select
+                    class="form-select"
+                    name="estado"
+                >
+
+                    <option value="">
+                        Todos los estados
+                    </option>
+
+
+                    {% for item in estados %}
+
+                        <option
+                            value="{{ item }}"
+
+                            {% if estado == item %}
+                                selected
+                            {% endif %}
+                        >
+
+                            {{
+                                item.replace(
+                                    "_",
+                                    " "
+                                )
+                            }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- BUSCAR -->
+
+            <div class="col-auto">
+
+                <button
+                    type="submit"
+                    class="btn btn-outline-primary"
+                >
+
+                    <i class="bi bi-search me-1"></i>
+
+                    Buscar
+
+                </button>
+
+            </div>
+
+
+            <!-- LIMPIAR -->
+
+            <div class="col-auto">
+
+                <a
+                    href="{{ url_for(
+                        'boletas_vendedor.lista'
+                    ) }}"
+                    class="btn btn-outline-secondary"
+                >
+
+                    Limpiar
+
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     COTIZACIONES
+====================================================== -->
+
+<div class="card border-0 shadow-sm">
+
+
+    <div class="card-body p-0">
+
+
+        <div class="table-responsive">
+
+
+            <table
+                class="table table-hover align-middle mb-0"
+            >
+
+
+                <thead class="table-light">
+
+
+                    <tr>
+
+
+                        <th class="ps-4">
+                            Cotización
+                        </th>
+
+
+                        <th>
+                            Cliente
+                        </th>
+
+
+                        <th>
+                            Vendedor
+                        </th>
+
+
+                        <th>
+                            Vigencia
+                        </th>
+
+
+                        <th class="text-end">
+                            Total
+                        </th>
+
+
+                        <th>
+                            Estado
+                        </th>
+
+
+                        <th>
+                            Boleta
+                        </th>
+
+
+                        <th class="text-end pe-4">
+                            Acción
+                        </th>
+
+
+                    </tr>
+
+
+                </thead>
+
+
+                <tbody>
+
+
+                    {% for item in cotizaciones %}
+
+
+                        <tr>
+
+
+                            <!-- =================================
+                                 COTIZACION
+                            ================================== -->
+
+                            <td class="ps-4">
+
+
+                                <strong>
+
+                                    {{ item.numero_cotizacion }}
+
+                                </strong>
+
+
+                                <div class="small text-muted">
+
+
+                                    {% if item.fecha_emision %}
+
+                                        {{
+                                            item.fecha_emision.strftime(
+                                                "%d/%m/%Y"
+                                            )
+                                        }}
+
+                                    {% else %}
+
+                                        Sin fecha
+
+                                    {% endif %}
+
+
+                                </div>
+
+
+                            </td>
+
+
+                            <!-- =================================
+                                 CLIENTE
+                            ================================== -->
+
+                            <td>
+
+
+                                <strong>
+
+                                    {{
+                                        item.cliente
+                                        or "Cliente no disponible"
+                                    }}
+
+                                </strong>
+
+
+                                {% if item.numero_documento %}
+
+
+                                    <div class="small text-muted">
+
+                                        {{
+                                            item.numero_documento
+                                        }}
+
+                                    </div>
+
+
+                                {% endif %}
+
+
+                            </td>
+
+
+                            <!-- =================================
+                                 VENDEDOR
+                            ================================== -->
+
+                            <td>
+
+
+                                {{
+                                    item.vendedor
+                                    or "Usuario"
+                                }}
+
+
+                                {% if
+                                    item.id_vendedor
+                                    == current_user.id_usuario
+                                %}
+
+
+                                    <div class="mt-1">
+
+                                        <span
+                                            class="badge text-bg-primary"
+                                        >
+
+                                            <i
+                                                class="bi bi-person-check me-1"
+                                            ></i>
+
+                                            Mía
+
+                                        </span>
+
+                                    </div>
+
+
+                                {% endif %}
+
+
+                            </td>
+
+
+                            <!-- =================================
+                                 VIGENCIA
+                            ================================== -->
+
+                            <td>
+
+
+                                {% if item.fecha_vigencia %}
+
+
+                                    {{
+                                        item.fecha_vigencia.strftime(
+                                            "%d/%m/%Y"
+                                        )
+                                    }}
+
+
+                                {% else %}
+
+
+                                    <span class="text-muted">
+
+                                        Sin fecha
+
+                                    </span>
+
+
+                                {% endif %}
+
+
+                                <div class="mt-1">
+
+
+                                    {% if item.vigente %}
+
+
+                                        <span
+                                            class="badge text-bg-success"
+                                        >
+
+                                            <i
+                                                class="bi bi-check-circle me-1"
+                                            ></i>
+
+                                            Vigente
+
+                                        </span>
+
+
+                                    {% else %}
+
+
+                                        <span
+                                            class="badge text-bg-danger"
+                                        >
+
+                                            <i
+                                                class="bi bi-clock-history me-1"
+                                            ></i>
+
+                                            Vencida
+
+                                        </span>
+
+
+                                    {% endif %}
+
+
+                                </div>
+
+
+                            </td>
+
+
+                            <!-- =================================
+                                 TOTAL
+                            ================================== -->
+
+                            <td class="text-end">
+
+
+                                <strong>
+
+
+                                    {% if item.moneda == "PEN" %}
+
+                                        S/
+
+                                    {% else %}
+
+                                        US$
+
+                                    {% endif %}
+
+
+                                    {{
+                                        "%.2f"|format(
+                                            item.total
+                                        )
+                                    }}
+
+
+                                </strong>
+
+
+                            </td>
+
+
+                            <!-- =================================
+                                 ESTADO COTIZACION
+                            ================================== -->
+
+                            <td>
+
+
+                                {% if
+                                    item.estado_cotizacion
+                                    == "CONVERTIDA_VENTA"
+                                %}
+
+
+                                    <span
+                                        class="badge text-bg-success"
+                                    >
+
+                                        Venta realizada
+
+                                    </span>
+
+
+                                {% elif
+                                    item.estado_cotizacion
+                                    == "VENCIDA"
+                                %}
+
+
+                                    <span
+                                        class="badge text-bg-danger"
+                                    >
+
+                                        Vencida
+
+                                    </span>
+
+
+                                {% elif
+                                    item.estado_cotizacion
+                                    in [
+                                        "EMITIDA",
+                                        "ENVIADA"
+                                    ]
+                                %}
+
+
+                                    <span
+                                        class="badge text-bg-primary"
+                                    >
+
+                                        {{
+                                            item.estado_cotizacion
+                                        }}
+
+                                    </span>
+
+
+                                {% elif
+                                    item.estado_cotizacion
+                                    == "APROBADA"
+                                %}
+
+
+                                    <span
+                                        class="badge text-bg-warning"
+                                    >
+
+                                        Aprobada
+
+                                    </span>
+
+
+                                {% else %}
+
+
+                                    <span
+                                        class="badge text-bg-secondary"
+                                    >
+
+                                        {{
+                                            item.estado_cotizacion
+                                                .replace(
+                                                    "_",
+                                                    " "
+                                                )
+                                        }}
+
+                                    </span>
+
+
+                                {% endif %}
+
+
+                            </td>
+
+
+                            <!-- =================================
+                                 BOLETA
+                            ================================== -->
+
+                            <td>
+
+
+                                {% if
+                                    item.estado_boleta
+                                    == "GENERADA"
+                                %}
+
+
+                                    <span
+                                        class="badge text-bg-success"
+                                    >
+
+                                        <i
+                                            class="bi bi-receipt me-1"
+                                        ></i>
+
+                                        {{
+                                            item.serie
+                                        }}-{{
+                                            item.numero_boleta
+                                        }}
+
+                                    </span>
+
+
+                                {% elif
+                                    item.estado_boleta
+                                    == "ERROR"
+                                %}
+
+
+                                    <span
+                                        class="badge text-bg-danger"
+                                    >
+
+                                        Error NubeFact
+
+                                    </span>
+
+
+                                {% elif item.id_venta %}
+
+
+                                    <span
+                                        class="badge text-bg-warning"
+                                    >
+
+                                        Pendiente
+
+                                    </span>
+
+
+                                {% else %}
+
+
+                                    <span class="text-muted">
+
+                                        Aún no generada
+
+                                    </span>
+
+
+                                {% endif %}
+
+
+                            </td>
+
+
+                            <!-- =================================
+                                 ACCIONES
+                            ================================== -->
+
+                            <td class="text-end pe-4">
+
+
+                                <!-- =================================
+                                     BOLETA GENERADA
+                                ================================== -->
+
+                                {% if
+                                    item.id_boleta
+                                    and
+                                    item.estado_boleta
+                                    == "GENERADA"
+                                %}
+
+
+                                    <a
+                                        href="{{ url_for(
+                                            'boletas_vendedor.detalle',
+                                            id_boleta=item.id_boleta
+                                        ) }}"
+                                        class="btn btn-sm btn-outline-primary"
+                                    >
+
+                                        <i
+                                            class="bi bi-eye me-1"
+                                        ></i>
+
+                                        Ver boleta
+
+                                    </a>
+
+
+                                <!-- =================================
+                                     ERROR
+                                ================================== -->
+
+                                {% elif
+                                    item.id_boleta
+                                    and
+                                    item.estado_boleta
+                                    == "ERROR"
+                                %}
+
+
+                                    <a
+                                        href="{{ url_for(
+                                            'boletas_vendedor.detalle',
+                                            id_boleta=item.id_boleta
+                                        ) }}"
+                                        class="btn btn-sm btn-outline-warning"
+                                    >
+
+                                        <i
+                                            class="bi bi-exclamation-triangle me-1"
+                                        ></i>
+
+                                        Revisar
+
+                                    </a>
+
+
+                                <!-- =================================
+                                     YA EXISTE VENTA
+                                ================================== -->
+
+                                {% elif item.id_venta %}
+
+
+                                    <a
+                                        href="{{ url_for(
+                                            'boletas_vendedor.generar_desde_venta',
+                                            id_venta=item.id_venta
+                                        ) }}"
+                                        class="btn btn-sm btn-primary"
+                                    >
+
+                                        <i
+                                            class="bi bi-receipt me-1"
+                                        ></i>
+
+                                        Generar boleta
+
+                                    </a>
+
+
+                                <!-- =================================
+                                     APROBAR Y VENDER
+                                ================================== -->
+
+                                {% elif
+                                    item.vigente
+                                    and
+                                    item.estado_cotizacion
+                                    in [
+                                        "EMITIDA",
+                                        "ENVIADA",
+                                        "APROBADA"
+                                    ]
+                                %}
+
+
+                                    <form
+                                        method="POST"
+
+                                        action="{{ url_for(
+                                            'boletas_vendedor.aprobar_cotizacion',
+                                            id_cotizacion=item.id_cotizacion
+                                        ) }}"
+
+                                        class="d-inline"
+                                    >
+
+
+                                        <input
+                                            type="hidden"
+                                            name="csrf_token"
+                                            value="{{ csrf_token() }}"
+                                        >
+
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-sm btn-success"
+
+                                            onclick="
+                                                return confirm(
+                                                    '¿El cliente confirmó la compra? ' +
+                                                    'Al continuar se aprobará la cotización, ' +
+                                                    'se convertirá en venta y se descontará ' +
+                                                    'el stock real.'
+                                                );
+                                            "
+                                        >
+
+                                            <i
+                                                class="bi bi-check-circle me-1"
+                                            ></i>
+
+                                            Aprobar y vender
+
+                                        </button>
+
+
+                                    </form>
+
+
+                                <!-- =================================
+                                     VENCIDA
+                                ================================== -->
+
+                                {% elif not item.vigente %}
+
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-secondary"
+                                        disabled
+                                    >
+
+                                        <i
+                                            class="bi bi-lock me-1"
+                                        ></i>
+
+                                        No aprobable
+
+                                    </button>
+
+
+                                {% else %}
+
+
+                                    <span class="text-muted">
+
+                                        Sin acciones
+
+                                    </span>
+
+
+                                {% endif %}
+
+
+                            </td>
+
+
+                        </tr>
+
+
+                    {% else %}
+
+
+                        <tr>
+
+
+                            <td
+                                colspan="8"
+                                class="text-center py-5"
+                            >
+
+
+                                <i
+                                    class="bi bi-receipt fs-1 text-muted"
+                                ></i>
+
+
+                                <div class="text-muted mt-2">
+
+                                    No existen cotizaciones.
+
+                                </div>
+
+
+                                {% if
+                                    buscar
+                                    or estado
+                                %}
+
+
+                                    <div class="mt-3">
+
+
+                                        <a
+                                            href="{{ url_for(
+                                                'boletas_vendedor.lista'
+                                            ) }}"
+                                            class="btn btn-sm btn-outline-secondary"
+                                        >
+
+                                            Mostrar todas
+
+                                        </a>
+
+
+                                    </div>
+
+
+                                {% endif %}
+
+
+                            </td>
+
+
+                        </tr>
+
+
+                    {% endfor %}
+
+
+                </tbody>
+
+
+            </table>
+
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =================================================
+         PAGINACION
+    ================================================== -->
+
+    {% if
+        hay_anterior
+        or hay_siguiente
+    %}
+
+
+        <div
+            class="card-footer bg-white border-0 px-4 py-3"
+        >
+
+
+            <div
+                class="
+                    d-flex
+                    flex-wrap
+                    justify-content-between
+                    align-items-center
+                    gap-3
+                "
+            >
+
+
+                <!-- INFORMACION -->
+
+                <div class="small text-muted">
+
+
+                    Página
+
+                    <strong>
+
+                        {{ pagina }}
+
+                    </strong>
+
+
+                    <span class="mx-1">
+
+                        ·
+
+                    </span>
+
+
+                    Máximo
+
+                    <strong>
+
+                        {{ por_pagina }}
+
+                    </strong>
+
+                    cotizaciones por página
+
+
+                </div>
+
+
+                <!-- NAVEGACION -->
+
+                <div class="btn-group">
+
+
+                    <!-- ANTERIOR -->
+
+                    {% if hay_anterior %}
+
+
+                        <a
+                            href="{{ url_for(
+                                'boletas_vendedor.lista',
+
+                                pagina=pagina - 1,
+
+                                buscar=buscar,
+
+                                estado=estado
+                            ) }}"
+
+                            class="btn btn-sm btn-outline-secondary"
+                        >
+
+                            <i
+                                class="bi bi-chevron-left me-1"
+                            ></i>
+
+                            Anterior
+
+                        </a>
+
+
+                    {% else %}
+
+
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            disabled
+                        >
+
+                            <i
+                                class="bi bi-chevron-left me-1"
+                            ></i>
+
+                            Anterior
+
+                        </button>
+
+
+                    {% endif %}
+
+
+                    <!-- PAGINA ACTUAL -->
+
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-light border"
+                        disabled
+                    >
+
+                        {{ pagina }}
+
+                    </button>
+
+
+                    <!-- SIGUIENTE -->
+
+                    {% if hay_siguiente %}
+
+
+                        <a
+                            href="{{ url_for(
+                                'boletas_vendedor.lista',
+
+                                pagina=pagina + 1,
+
+                                buscar=buscar,
+
+                                estado=estado
+                            ) }}"
+
+                            class="btn btn-sm btn-outline-primary"
+                        >
+
+                            Siguiente
+
+                            <i
+                                class="bi bi-chevron-right ms-1"
+                            ></i>
+
+                        </a>
+
+
+                    {% else %}
+
+
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-primary"
+                            disabled
+                        >
+
+                            Siguiente
+
+                            <i
+                                class="bi bi-chevron-right ms-1"
+                            ></i>
+
+                        </button>
+
+
+                    {% endif %}
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    {% endif %}
+
+
+</div>
+
+
+{% endblock %}

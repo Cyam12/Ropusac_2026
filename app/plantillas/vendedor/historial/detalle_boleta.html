@@ -1,0 +1,650 @@
+{% extends "vendedor/base.html" %}
+
+
+{% block titulo %}
+Historial Boleta
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<div
+    class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"
+>
+
+    <div>
+
+        <h1 class="h3 mb-1">
+
+            Boleta
+
+            {% if
+                boleta.serie
+                and boleta.numero
+            %}
+
+                {{ boleta.serie }}-{{ boleta.numero }}
+
+            {% endif %}
+
+        </h1>
+
+        <p class="text-muted mb-0">
+
+            Consulta histórica de comprobante
+
+        </p>
+
+    </div>
+
+
+    <div class="d-flex gap-2">
+
+
+        <a
+            href="{{ url_for(
+                'dashboard.vendedor_historial'
+            ) }}"
+            class="btn btn-outline-secondary"
+        >
+
+            <i class="bi bi-arrow-left me-1"></i>
+
+            Volver
+
+        </a>
+
+
+        {% if
+            boleta.estado == "GENERADA"
+            and boleta.enlace_pdf
+        %}
+
+            <a
+                href="{{ url_for(
+                    'dashboard.vendedor_historial_boleta_pdf',
+                    id_boleta=boleta.id_boleta
+                ) }}"
+
+                target="_blank"
+
+                class="btn btn-outline-primary"
+            >
+
+                <i
+                    class="bi bi-file-earmark-pdf me-1"
+                ></i>
+
+                Visualizar PDF
+
+            </a>
+
+
+            <a
+                href="{{ url_for(
+                    'dashboard.vendedor_historial_boleta_pdf',
+                    id_boleta=boleta.id_boleta,
+                    descargar=1
+                ) }}"
+
+                class="btn btn-outline-success"
+            >
+
+                <i class="bi bi-download me-1"></i>
+
+                Descargar
+
+            </a>
+
+        {% endif %}
+
+
+    </div>
+
+</div>
+
+
+<div class="alert alert-light border">
+
+    <i class="bi bi-lock me-2"></i>
+
+    Este comprobante pertenece al historial.
+    Únicamente puede consultarse o descargarse.
+
+</div>
+
+
+<!-- =====================================================
+     INFORMACION
+====================================================== -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-header bg-white">
+
+        <strong>
+            Información del comprobante
+        </strong>
+
+    </div>
+
+
+    <div class="card-body">
+
+        <div class="row g-4">
+
+
+            <div class="col-md-3">
+
+                <small class="text-muted">
+                    Estado
+                </small>
+
+                <div>
+
+                    {% if boleta.estado == "GENERADA" %}
+
+                        <span
+                            class="badge text-bg-success"
+                        >
+                            GENERADA
+                        </span>
+
+                    {% elif boleta.estado == "ERROR" %}
+
+                        <span
+                            class="badge text-bg-danger"
+                        >
+                            ERROR
+                        </span>
+
+                    {% else %}
+
+                        <span
+                            class="badge text-bg-secondary"
+                        >
+
+                            {{ boleta.estado }}
+
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <small class="text-muted">
+                    Fecha de emisión
+                </small>
+
+                <div>
+
+                    {% if boleta.fecha_emision %}
+
+                        {{
+                            boleta.fecha_emision.strftime(
+                                "%d/%m/%Y"
+                            )
+                        }}
+
+                    {% else %}
+
+                        No registrada
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <small class="text-muted">
+                    Venta
+                </small>
+
+                <div>
+
+                    {{ boleta.numero_venta }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <small class="text-muted">
+                    Cotización
+                </small>
+
+                <div>
+
+                    {{ boleta.numero_cotizacion }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Vendedor
+                </small>
+
+                <div>
+
+                    {{ boleta.vendedor }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Cliente
+                </small>
+
+                <div class="fw-semibold">
+
+                    {{ boleta.cliente_nombre }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Documento
+                </small>
+
+                <div>
+
+                    {{
+                        boleta.cliente_tipo_documento
+                        or ""
+                    }}
+
+                    {{
+                        boleta.cliente_numero_documento
+                        or ""
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Correo
+                </small>
+
+                <div>
+
+                    {{
+                        boleta.cliente_correo
+                        or "No registrado"
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Dirección
+                </small>
+
+                <div>
+
+                    {{
+                        boleta.cliente_direccion
+                        or "No registrada"
+                    }}
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     PRODUCTOS
+====================================================== -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-header bg-white">
+
+        <strong>
+            Productos vendidos
+        </strong>
+
+    </div>
+
+
+    <div class="table-responsive">
+
+        <table class="table mb-0 align-middle">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Código
+                    </th>
+
+                    <th>
+                        Producto
+                    </th>
+
+                    <th>
+                        Unidad
+                    </th>
+
+                    <th class="text-end">
+                        Cantidad
+                    </th>
+
+                    <th class="text-end">
+                        Precio final
+                    </th>
+
+                    <th class="text-end">
+                        Importe
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for item in detalles %}
+
+                    <tr>
+
+                        <td>
+                            {{ item.codigo_producto }}
+                        </td>
+
+                        <td>
+                            {{ item.nombre_producto }}
+                        </td>
+
+                        <td>
+                            {{ item.unidad_medida }}
+                        </td>
+
+                        <td class="text-end">
+                            {{ item.cantidad }}
+                        </td>
+
+                        <td class="text-end">
+
+                            {% if boleta.moneda == "PEN" %}
+                                S/
+                            {% else %}
+                                US$
+                            {% endif %}
+
+                            {{
+                                "%.2f"|format(
+                                    item.precio_unitario
+                                )
+                            }}
+
+                        </td>
+
+                        <td class="text-end">
+
+                            {% if boleta.moneda == "PEN" %}
+                                S/
+                            {% else %}
+                                US$
+                            {% endif %}
+
+                            {{
+                                "%.2f"|format(
+                                    item.subtotal
+                                )
+                            }}
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     TOTALES
+====================================================== -->
+
+<div class="row justify-content-end">
+
+    <div class="col-lg-5">
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body">
+
+
+                <div
+                    class="d-flex justify-content-between mb-2"
+                >
+
+                    <span>
+                        Subtotal
+                    </span>
+
+                    <span>
+
+                        {% if boleta.moneda == "PEN" %}
+                            S/
+                        {% else %}
+                            US$
+                        {% endif %}
+
+                        {{
+                            "%.2f"|format(
+                                boleta.subtotal
+                            )
+                        }}
+
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="d-flex justify-content-between mb-2"
+                >
+
+                    <span>
+                        IGV incluido (18%)
+                    </span>
+
+                    <span>
+
+                        {% if boleta.moneda == "PEN" %}
+                            S/
+                        {% else %}
+                            US$
+                        {% endif %}
+
+                        {{
+                            "%.2f"|format(
+                                igv
+                            )
+                        }}
+
+                    </span>
+
+                </div>
+
+
+                <hr>
+
+
+                <div
+                    class="d-flex justify-content-between"
+                >
+
+                    <strong>
+                        TOTAL
+                    </strong>
+
+                    <strong class="fs-4">
+
+                        {% if boleta.moneda == "PEN" %}
+                            S/
+                        {% else %}
+                            US$
+                        {% endif %}
+
+                        {{
+                            "%.2f"|format(
+                                boleta.total
+                            )
+                        }}
+
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     DOCUMENTOS
+====================================================== -->
+
+{% if boleta.estado == "GENERADA" %}
+
+    <div class="card border-0 shadow-sm mt-4">
+
+        <div class="card-header bg-white">
+
+            <strong>
+                Documentos electrónicos
+            </strong>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="d-flex flex-wrap gap-2">
+
+
+                {% if boleta.enlace_pdf %}
+
+                    <a
+                        href="{{ url_for(
+                            'dashboard.vendedor_historial_boleta_pdf',
+                            id_boleta=boleta.id_boleta
+                        ) }}"
+
+                        target="_blank"
+
+                        class="btn btn-outline-danger"
+                    >
+
+                        <i
+                            class="bi bi-file-earmark-pdf me-1"
+                        ></i>
+
+                        PDF
+
+                    </a>
+
+                {% endif %}
+
+
+                {% if boleta.enlace_xml %}
+
+                    <a
+                        href="{{ boleta.enlace_xml }}"
+
+                        target="_blank"
+
+                        rel="noopener noreferrer"
+
+                        class="btn btn-outline-secondary"
+                    >
+
+                        XML
+
+                    </a>
+
+                {% endif %}
+
+
+                {% if boleta.enlace_cdr %}
+
+                    <a
+                        href="{{ boleta.enlace_cdr }}"
+
+                        target="_blank"
+
+                        rel="noopener noreferrer"
+
+                        class="btn btn-outline-secondary"
+                    >
+
+                        CDR
+
+                    </a>
+
+                {% endif %}
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+{% endif %}
+
+
+{% endblock %}

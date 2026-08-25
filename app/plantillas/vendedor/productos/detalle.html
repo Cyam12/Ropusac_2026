@@ -1,0 +1,422 @@
+{% extends "vendedor/base.html" %}
+
+
+{% block titulo %}
+Detalle Producto
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<div
+    class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"
+>
+
+    <div>
+
+        <h1 class="h3 mb-1">
+
+            {{ producto.nombre }}
+
+        </h1>
+
+        <p class="text-muted mb-0">
+
+            {{ producto.codigo_producto }}
+
+        </p>
+
+    </div>
+
+
+    <a
+        href="{{ url_for(
+            'productos_vendedor.lista'
+        ) }}"
+        class="btn btn-outline-secondary"
+    >
+
+        <i class="bi bi-arrow-left me-1"></i>
+
+        Volver al catálogo
+
+    </a>
+
+</div>
+
+
+<div class="row g-4">
+
+
+    <!-- =================================================
+         IMAGEN
+    ================================================== -->
+
+    <div class="col-lg-5">
+
+
+        <div
+            class="card border-0 shadow-sm h-100"
+        >
+
+
+            <div
+                class="card-body d-flex align-items-center justify-content-center"
+                style="min-height:420px;"
+            >
+
+
+                {% if imagen %}
+
+
+                    <img
+                        src="{{ imagen.url_imagen }}"
+
+                        alt="{{ producto.nombre }}"
+
+                        class="img-fluid"
+
+                        style="
+                            max-height:390px;
+                            object-fit:contain;
+                        "
+                    >
+
+
+                {% else %}
+
+
+                    <div class="text-center text-muted">
+
+                        <i
+                            class="bi bi-image fs-1"
+                        ></i>
+
+                        <div class="mt-2">
+
+                            Imagen no disponible
+
+                        </div>
+
+                    </div>
+
+
+                {% endif %}
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =================================================
+         INFORMACION
+    ================================================== -->
+
+    <div class="col-lg-7">
+
+
+        <div
+            class="card border-0 shadow-sm h-100"
+        >
+
+
+            <div class="card-body p-4">
+
+
+                <div class="row g-4">
+
+
+                    <!-- PRODUCTO -->
+
+                    <div class="col-12">
+
+                        <small class="text-muted">
+
+                            Producto
+
+                        </small>
+
+                        <div
+                            class="fw-semibold fs-4"
+                        >
+
+                            {{ producto.nombre }}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- CODIGO -->
+
+                    <div class="col-md-6">
+
+                        <small class="text-muted">
+
+                            Código
+
+                        </small>
+
+                        <div>
+
+                            {{ producto.codigo_producto }}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PROVEEDOR -->
+
+                    <div class="col-md-6">
+
+                        <small class="text-muted">
+
+                            Proveedor
+
+                        </small>
+
+                        <div>
+
+                            {{ proveedor.razon_social }}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- CATEGORIA -->
+
+                    <div class="col-md-4">
+
+                        <small class="text-muted">
+
+                            Categoría
+
+                        </small>
+
+                        <div>
+
+                            {{
+                                producto.categoria
+                                or "No registrada"
+                            }}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- MARCA -->
+
+                    <div class="col-md-4">
+
+                        <small class="text-muted">
+
+                            Marca
+
+                        </small>
+
+                        <div>
+
+                            {{
+                                producto.marca
+                                or "No registrada"
+                            }}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- MODELO -->
+
+                    <div class="col-md-4">
+
+                        <small class="text-muted">
+
+                            Modelo
+
+                        </small>
+
+                        <div>
+
+                            {{
+                                producto.modelo
+                                or "No registrado"
+                            }}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- UNIDAD -->
+
+                    <div class="col-md-6">
+
+                        <small class="text-muted">
+
+                            Unidad de medida
+
+                        </small>
+
+                        <div>
+
+                            {{ producto.unidad_medida }}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- STOCK -->
+
+                    <div class="col-md-6">
+
+                        <small class="text-muted">
+
+                            Disponibilidad
+
+                        </small>
+
+                        <div>
+
+
+                            {% if
+                                producto.stock_disponible
+                                is not none
+                                and producto.stock_disponible > 0
+                            %}
+
+                                <span
+                                    class="badge text-bg-success"
+                                >
+
+                                    {{ producto.stock_disponible|int }}
+
+                                    {{ producto.unidad_medida }}
+
+                                    disponibles
+
+                                </span>
+
+                            {% else %}
+
+                                <span
+                                    class="badge text-bg-warning"
+                                >
+
+                                    Sin stock
+
+                                </span>
+
+                            {% endif %}
+
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- DESCRIPCION -->
+
+                    <div class="col-12">
+
+                        <small class="text-muted">
+
+                            Descripción
+
+                        </small>
+
+                        <div>
+
+                            {{
+                                producto.descripcion
+                                or "Sin descripción"
+                            }}
+
+                        </div>
+
+                    </div>
+
+
+                    <hr>
+
+
+                    <!-- =================================================
+                         PRECIO FINAL
+                    ================================================== -->
+
+                    <div class="col-12">
+
+
+                        <small class="text-muted">
+
+                            Precio final de venta
+
+                        </small>
+
+
+                        <div
+                            class="display-6 fw-bold mt-1"
+                        >
+
+
+                            {% if
+                                producto.moneda_precio.value
+                                == "PEN"
+                            %}
+
+                                S/
+
+                            {% else %}
+
+                                US$
+
+                            {% endif %}
+
+
+                            {{
+                                "%.2f"|format(
+                                    producto.precio_venta_actual
+                                )
+                            }}
+
+
+                        </div>
+
+
+                        <div class="text-muted small mt-2">
+
+                            Precio establecido por
+                            Administración o Área Comercial.
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+{% endblock %}

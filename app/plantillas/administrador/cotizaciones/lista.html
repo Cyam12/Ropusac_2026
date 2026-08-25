@@ -1,0 +1,982 @@
+{% extends "administrador/base.html" %}
+
+
+{% block titulo %}
+Cotizaciones
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<!-- =====================================================
+     CABECERA
+====================================================== -->
+
+<div
+    class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"
+>
+
+    <div>
+
+        <h1 class="h3 mb-1">
+
+            Cotizaciones
+
+        </h1>
+
+        <p class="text-muted mb-0">
+
+            Consulte las cotizaciones registradas
+            por todos los vendedores.
+
+        </p>
+
+    </div>
+
+
+    <div>
+
+        <span
+            class="badge text-bg-light border fs-6 fw-normal"
+        >
+
+            {{ total_registros }}
+
+            {% if total_registros == 1 %}
+                cotización
+            {% else %}
+                cotizaciones
+            {% endif %}
+
+        </span>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     FILTROS
+====================================================== -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body">
+
+        <form
+            method="GET"
+            class="row g-2"
+        >
+
+
+            <!-- BUSCAR -->
+
+            <div class="col-lg-5">
+
+                <input
+                    type="text"
+
+                    class="form-control"
+
+                    name="buscar"
+
+                    value="{{ buscar }}"
+
+                    placeholder="Número, cliente, documento o vendedor"
+                >
+
+            </div>
+
+
+            <!-- VENDEDOR -->
+
+            <div class="col-lg-3">
+
+                <select
+                    class="form-select"
+                    name="id_vendedor"
+                >
+
+                    <option value="">
+
+                        Todos los vendedores
+
+                    </option>
+
+
+                    {% for vendedor in vendedores %}
+
+
+                        <option
+                            value="{{ vendedor.id_usuario }}"
+
+                            {% if
+                                id_vendedor
+                                == vendedor.id_usuario
+                            %}
+                                selected
+                            {% endif %}
+                        >
+
+                            {{
+                                nombre_usuario(
+                                    vendedor
+                                )
+                            }}
+
+                        </option>
+
+
+                    {% endfor %}
+
+
+                </select>
+
+            </div>
+
+
+            <!-- ESTADO -->
+
+            <div class="col-lg-2">
+
+                <select
+                    class="form-select"
+                    name="estado"
+                >
+
+                    <option value="">
+
+                        Todos los estados
+
+                    </option>
+
+
+                    {% for item in estados %}
+
+
+                        <option
+                            value="{{ item }}"
+
+                            {% if
+                                estado == item
+                            %}
+                                selected
+                            {% endif %}
+                        >
+
+                            {{
+                                item.replace(
+                                    "_",
+                                    " "
+                                )
+                            }}
+
+                        </option>
+
+
+                    {% endfor %}
+
+
+                </select>
+
+            </div>
+
+
+            <!-- BUSCAR -->
+
+            <div class="col-auto">
+
+                <button
+                    type="submit"
+                    class="btn btn-outline-primary"
+                >
+
+                    <i
+                        class="bi bi-search me-1"
+                    ></i>
+
+                    Buscar
+
+                </button>
+
+            </div>
+
+
+            <!-- LIMPIAR -->
+
+            <div class="col-auto">
+
+                <a
+                    href="{{ url_for(
+                        'cotizaciones_admin.lista'
+                    ) }}"
+                    class="btn btn-outline-secondary"
+                >
+
+                    Limpiar
+
+                </a>
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     TABLA
+====================================================== -->
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body p-0">
+
+        <div class="table-responsive">
+
+            <table
+                class="table table-hover align-middle mb-0"
+            >
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th class="ps-4">
+                            Cotización
+                        </th>
+
+                        <th>
+                            Cliente
+                        </th>
+
+                        <th>
+                            Vendedor
+                        </th>
+
+                        <th>
+                            Emisión
+                        </th>
+
+                        <th>
+                            Vigencia
+                        </th>
+
+                        <th>
+                            Estado
+                        </th>
+
+                        <th class="text-end">
+                            Total
+                        </th>
+
+                        <th class="text-end pe-4">
+                            Acciones
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                    {% for item in cotizaciones %}
+
+
+                        {% set cotizacion = item.cotizacion %}
+
+                        {% set estado_actual =
+                            texto_enum(
+                                cotizacion.estado
+                            )
+                        %}
+
+                        {% set moneda =
+                            texto_enum(
+                                cotizacion.moneda
+                            )
+                        %}
+
+
+                        <tr>
+
+
+                            <!-- COTIZACION -->
+
+                            <td class="ps-4">
+
+                                <strong>
+
+                                    {{
+                                        cotizacion.numero_cotizacion
+                                    }}
+
+                                </strong>
+
+                            </td>
+
+
+                            <!-- CLIENTE -->
+
+                            <td>
+
+                                <div class="fw-semibold">
+
+                                    {{ item.cliente }}
+
+                                </div>
+
+
+                                {% if item.cliente_documento %}
+
+                                    <div
+                                        class="small text-muted"
+                                    >
+
+                                        {{
+                                            item.cliente_documento
+                                        }}
+
+                                    </div>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- VENDEDOR -->
+
+                            <td>
+
+                                {{ item.vendedor }}
+
+                            </td>
+
+
+                            <!-- EMISION -->
+
+                            <td>
+
+                                {% if
+                                    cotizacion.fecha_emision
+                                %}
+
+                                    {{
+                                        cotizacion.fecha_emision.strftime(
+                                            "%d/%m/%Y"
+                                        )
+                                    }}
+
+                                {% else %}
+
+                                    -
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- VIGENCIA -->
+
+                            <td>
+
+                                {% if
+                                    cotizacion.fecha_vigencia
+                                %}
+
+                                    {{
+                                        cotizacion.fecha_vigencia.strftime(
+                                            "%d/%m/%Y"
+                                        )
+                                    }}
+
+                                {% else %}
+
+                                    -
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- ESTADO -->
+
+                            <td>
+
+
+                                {% if
+                                    estado_actual == "VENCIDA"
+                                %}
+
+                                    <span
+                                        class="badge text-bg-danger"
+                                    >
+
+                                        VENCIDA
+
+                                    </span>
+
+
+                                {% elif
+                                    estado_actual == "APROBADA"
+                                %}
+
+                                    <span
+                                        class="badge text-bg-success"
+                                    >
+
+                                        APROBADA
+
+                                    </span>
+
+
+                                {% elif
+                                    estado_actual
+                                    == "CONVERTIDA_VENTA"
+                                %}
+
+                                    <span
+                                        class="badge text-bg-success"
+                                    >
+
+                                        CONVERTIDA A VENTA
+
+                                    </span>
+
+
+                                {% elif
+                                    estado_actual
+                                    in ["EMITIDA", "ENVIADA"]
+                                %}
+
+                                    <span
+                                        class="badge text-bg-primary"
+                                    >
+
+                                        {{
+                                            estado_actual.replace(
+                                                "_",
+                                                " "
+                                            )
+                                        }}
+
+                                    </span>
+
+
+                                {% elif
+                                    estado_actual
+                                    in ["RECHAZADA", "ANULADA"]
+                                %}
+
+                                    <span
+                                        class="badge text-bg-danger"
+                                    >
+
+                                        {{
+                                            estado_actual.replace(
+                                                "_",
+                                                " "
+                                            )
+                                        }}
+
+                                    </span>
+
+
+                                {% else %}
+
+                                    <span
+                                        class="badge text-bg-secondary"
+                                    >
+
+                                        {{
+                                            estado_actual.replace(
+                                                "_",
+                                                " "
+                                            )
+                                        }}
+
+                                    </span>
+
+
+                                {% endif %}
+
+
+                            </td>
+
+
+                            <!-- TOTAL -->
+
+                            <td class="text-end">
+
+                                <strong>
+
+                                    {% if moneda == "PEN" %}
+
+                                        S/
+
+                                    {% else %}
+
+                                        US$
+
+                                    {% endif %}
+
+                                    {{
+                                        "%.2f"|format(
+                                            cotizacion.total
+                                        )
+                                    }}
+
+                                </strong>
+
+                            </td>
+
+
+                            <!-- ACCIONES -->
+
+                            <td class="text-end pe-4">
+
+
+                                <!-- VER -->
+
+                                <a
+                                    href="{{ url_for(
+                                        'cotizaciones_admin.detalle',
+                                        id_cotizacion=cotizacion.id_cotizacion
+                                    ) }}"
+
+                                    class="btn btn-sm btn-outline-primary"
+
+                                    title="Consultar cotización"
+                                >
+
+                                    <i class="bi bi-eye"></i>
+
+                                </a>
+
+
+                                <!-- DESCARGAR -->
+
+                                <a
+                                    href="{{ url_for(
+                                        'cotizaciones_admin.descargar',
+                                        id_cotizacion=cotizacion.id_cotizacion
+                                    ) }}"
+
+                                    class="btn btn-sm btn-outline-success"
+
+                                    title="Descargar PDF"
+                                >
+
+                                    <i class="bi bi-download"></i>
+
+                                </a>
+
+
+                            </td>
+
+
+                        </tr>
+
+
+                    {% else %}
+
+
+                        <tr>
+
+                            <td
+                                colspan="8"
+                                class="text-center py-5"
+                            >
+
+                                <i
+                                    class="bi bi-file-earmark-text fs-1 text-muted"
+                                ></i>
+
+                                <div class="text-muted mt-2">
+
+                                    No se encontraron cotizaciones.
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+
+                    {% endfor %}
+
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         PAGINACION
+    ================================================== -->
+
+    {% if total_paginas > 1 %}
+
+
+        <div
+            class="card-footer bg-white border-0 px-4 py-3"
+        >
+
+
+            <div
+                class="d-flex flex-wrap justify-content-between align-items-center gap-3"
+            >
+
+
+                <!-- INFORMACION -->
+
+                <div class="small text-muted">
+
+
+                    {% set inicio_registro =
+                        (
+                            (pagina - 1)
+                            * por_pagina
+                        )
+                        + 1
+                    %}
+
+
+                    {% set fin_registro =
+                        [
+                            pagina
+                            * por_pagina,
+                            total_registros
+                        ]
+                        | min
+                    %}
+
+
+                    Mostrando
+
+                    <strong>
+
+                        {{ inicio_registro }}
+
+                    </strong>
+
+                    -
+
+                    <strong>
+
+                        {{ fin_registro }}
+
+                    </strong>
+
+                    de
+
+                    <strong>
+
+                        {{ total_registros }}
+
+                    </strong>
+
+
+                </div>
+
+
+                <!-- PAGINACION -->
+
+                <nav>
+
+                    <ul
+                        class="pagination pagination-sm mb-0"
+                    >
+
+
+                        <!-- ANTERIOR -->
+
+                        <li
+                            class="page-item
+                            {% if pagina <= 1 %}
+                                disabled
+                            {% endif %}"
+                        >
+
+                            <a
+                                class="page-link"
+
+                                href="{{ url_for(
+                                    'cotizaciones_admin.lista',
+
+                                    pagina=pagina - 1,
+
+                                    buscar=buscar,
+
+                                    estado=estado,
+
+                                    id_vendedor=(
+                                        id_vendedor
+                                        or ''
+                                    )
+                                ) }}"
+                            >
+
+                                <i
+                                    class="bi bi-chevron-left"
+                                ></i>
+
+                            </a>
+
+                        </li>
+
+
+                        <!-- =================================================
+                             RANGO DE PAGINAS
+                        ================================================== -->
+
+                        {% set pagina_inicio =
+                            [
+                                1,
+                                pagina - 2
+                            ]
+                            | max
+                        %}
+
+
+                        {% set pagina_fin =
+                            [
+                                total_paginas,
+                                pagina + 2
+                            ]
+                            | min
+                        %}
+
+
+                        <!-- PRIMERA PAGINA -->
+
+                        {% if pagina_inicio > 1 %}
+
+                            <li class="page-item">
+
+                                <a
+                                    class="page-link"
+
+                                    href="{{ url_for(
+                                        'cotizaciones_admin.lista',
+
+                                        pagina=1,
+
+                                        buscar=buscar,
+
+                                        estado=estado,
+
+                                        id_vendedor=(
+                                            id_vendedor
+                                            or ''
+                                        )
+                                    ) }}"
+                                >
+
+                                    1
+
+                                </a>
+
+                            </li>
+
+
+                            {% if pagina_inicio > 2 %}
+
+                                <li
+                                    class="page-item disabled"
+                                >
+
+                                    <span
+                                        class="page-link"
+                                    >
+
+                                        ...
+
+                                    </span>
+
+                                </li>
+
+                            {% endif %}
+
+
+                        {% endif %}
+
+
+                        <!-- PAGINAS CENTRALES -->
+
+                        {% for numero_pagina
+                            in range(
+                                pagina_inicio,
+                                pagina_fin + 1
+                            )
+                        %}
+
+
+                            <li
+                                class="page-item
+                                {% if
+                                    numero_pagina
+                                    == pagina
+                                %}
+                                    active
+                                {% endif %}"
+                            >
+
+                                <a
+                                    class="page-link"
+
+                                    href="{{ url_for(
+                                        'cotizaciones_admin.lista',
+
+                                        pagina=numero_pagina,
+
+                                        buscar=buscar,
+
+                                        estado=estado,
+
+                                        id_vendedor=(
+                                            id_vendedor
+                                            or ''
+                                        )
+                                    ) }}"
+                                >
+
+                                    {{ numero_pagina }}
+
+                                </a>
+
+                            </li>
+
+
+                        {% endfor %}
+
+
+                        <!-- ULTIMA PAGINA -->
+
+                        {% if
+                            pagina_fin
+                            < total_paginas
+                        %}
+
+
+                            {% if
+                                pagina_fin
+                                <
+                                total_paginas - 1
+                            %}
+
+                                <li
+                                    class="page-item disabled"
+                                >
+
+                                    <span
+                                        class="page-link"
+                                    >
+
+                                        ...
+
+                                    </span>
+
+                                </li>
+
+                            {% endif %}
+
+
+                            <li class="page-item">
+
+                                <a
+                                    class="page-link"
+
+                                    href="{{ url_for(
+                                        'cotizaciones_admin.lista',
+
+                                        pagina=total_paginas,
+
+                                        buscar=buscar,
+
+                                        estado=estado,
+
+                                        id_vendedor=(
+                                            id_vendedor
+                                            or ''
+                                        )
+                                    ) }}"
+                                >
+
+                                    {{ total_paginas }}
+
+                                </a>
+
+                            </li>
+
+
+                        {% endif %}
+
+
+                        <!-- SIGUIENTE -->
+
+                        <li
+                            class="page-item
+                            {% if
+                                pagina >= total_paginas
+                            %}
+                                disabled
+                            {% endif %}"
+                        >
+
+                            <a
+                                class="page-link"
+
+                                href="{{ url_for(
+                                    'cotizaciones_admin.lista',
+
+                                    pagina=pagina + 1,
+
+                                    buscar=buscar,
+
+                                    estado=estado,
+
+                                    id_vendedor=(
+                                        id_vendedor
+                                        or ''
+                                    )
+                                ) }}"
+                            >
+
+                                <i
+                                    class="bi bi-chevron-right"
+                                ></i>
+
+                            </a>
+
+                        </li>
+
+
+                    </ul>
+
+                </nav>
+
+
+            </div>
+
+
+        </div>
+
+
+    {% endif %}
+
+
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,864 @@
+{% extends "administrador/base.html" %}
+
+
+{% block titulo %}
+Boletas
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<!-- =====================================================
+     CABECERA
+====================================================== -->
+
+<div class="mb-4">
+
+    <h1 class="h3 mb-1">
+        Boletas
+    </h1>
+
+    <p class="text-muted mb-0">
+        Comprobantes electrónicos generados mediante NubeFact.
+    </p>
+
+</div>
+
+
+<!-- =====================================================
+     FILTROS
+====================================================== -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body">
+
+        <form
+            method="GET"
+            class="row g-2"
+        >
+
+
+            <!-- BUSCAR -->
+
+            <div class="col-lg-4">
+
+                <div class="input-group">
+
+                    <span
+                        class="input-group-text bg-white"
+                    >
+
+                        <i class="bi bi-search"></i>
+
+                    </span>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="buscar"
+                        value="{{ buscar }}"
+                        placeholder="Boleta, venta, cliente o vendedor"
+                        autocomplete="off"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- ESTADO -->
+
+            <div class="col-lg-3">
+
+                <select
+                    class="form-select"
+                    name="estado"
+                >
+
+                    <option value="">
+                        Todos los estados
+                    </option>
+
+                    {% for item in estados %}
+
+                        <option
+                            value="{{ item }}"
+
+                            {% if estado == item %}
+                                selected
+                            {% endif %}
+                        >
+
+                            {{ item }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- VENDEDOR -->
+
+            <div class="col-lg-3">
+
+                <select
+                    class="form-select"
+                    name="id_vendedor"
+                >
+
+                    <option value="">
+                        Todos los vendedores
+                    </option>
+
+
+                    {% for vendedor in vendedores %}
+
+                        <option
+                            value="{{ vendedor.id_usuario }}"
+
+                            {% if
+                                id_vendedor
+                                == vendedor.id_usuario
+                            %}
+                                selected
+                            {% endif %}
+                        >
+
+                            {{ vendedor.nombre_mostrar }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- BUSCAR -->
+
+            <div class="col-auto">
+
+                <button
+                    type="submit"
+                    class="btn btn-outline-primary"
+                >
+
+                    <i class="bi bi-search me-1"></i>
+
+                    Buscar
+
+                </button>
+
+            </div>
+
+
+            <!-- LIMPIAR -->
+
+            <div class="col-auto">
+
+                <a
+                    href="{{ url_for(
+                        'boletas_admin.lista'
+                    ) }}"
+                    class="btn btn-outline-secondary"
+                >
+
+                    Limpiar
+
+                </a>
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     LISTADO
+====================================================== -->
+
+<div class="card border-0 shadow-sm">
+
+
+    <div class="card-body p-0">
+
+
+        <div class="table-responsive">
+
+
+            <table
+                class="table table-hover align-middle mb-0"
+            >
+
+
+                <thead class="table-light">
+
+
+                    <tr>
+
+
+                        <th class="ps-4">
+                            Boleta
+                        </th>
+
+
+                        <th>
+                            Emisión
+                        </th>
+
+
+                        <th>
+                            Cliente
+                        </th>
+
+
+                        <th>
+                            Vendedor
+                        </th>
+
+
+                        <th>
+                            Estado
+                        </th>
+
+
+                        <th class="text-end">
+                            Total
+                        </th>
+
+
+                        <th class="text-end pe-4">
+                            Acciones
+                        </th>
+
+
+                    </tr>
+
+
+                </thead>
+
+
+                <tbody>
+
+
+                {% for item in boletas %}
+
+
+                    {% set boleta =
+                        item.boleta
+                    %}
+
+
+                    {% set estado_actual =
+                        texto_enum(
+                            boleta.estado
+                        )
+                    %}
+
+
+                    {% set moneda_actual =
+                        texto_enum(
+                            boleta.moneda
+                        )
+                    %}
+
+
+                    <tr>
+
+
+                        <!-- =================================
+                             BOLETA
+                        ================================== -->
+
+                        <td class="ps-4">
+
+
+                            <strong>
+
+                                {{ numero_boleta(boleta) }}
+
+                            </strong>
+
+
+                            <div class="small text-muted">
+
+                                <i
+                                    class="bi bi-cart-check me-1"
+                                ></i>
+
+                                {{ item.venta.numero_venta }}
+
+                            </div>
+
+
+                        </td>
+
+
+                        <!-- =================================
+                             EMISION
+                        ================================== -->
+
+                        <td>
+
+
+                            {% if boleta.fecha_emision %}
+
+
+                                {{
+                                    boleta.fecha_emision.strftime(
+                                        "%d/%m/%Y"
+                                    )
+                                }}
+
+
+                            {% else %}
+
+
+                                <span class="text-muted">
+
+                                    Pendiente
+
+                                </span>
+
+
+                            {% endif %}
+
+
+                        </td>
+
+
+                        <!-- =================================
+                             CLIENTE
+                        ================================== -->
+
+                        <td>
+
+
+                            <div class="fw-semibold">
+
+                                {{
+                                    boleta.cliente_nombre
+                                    or "Sin nombre"
+                                }}
+
+                            </div>
+
+
+                            {% if
+                                boleta.cliente_numero_documento
+                            %}
+
+
+                                <div class="small text-muted">
+
+                                    {{
+                                        boleta.cliente_numero_documento
+                                    }}
+
+                                </div>
+
+
+                            {% endif %}
+
+
+                        </td>
+
+
+                        <!-- =================================
+                             VENDEDOR
+                        ================================== -->
+
+                        <td>
+
+                            {{ item.vendedor }}
+
+                        </td>
+
+
+                        <!-- =================================
+                             ESTADO
+                        ================================== -->
+
+                        <td>
+
+
+                            {% if
+                                estado_actual == "GENERADA"
+                            %}
+
+
+                                <span
+                                    class="badge text-bg-success"
+                                >
+
+                                    <i
+                                        class="bi bi-check-circle me-1"
+                                    ></i>
+
+                                    GENERADA
+
+                                </span>
+
+
+                            {% elif
+                                estado_actual == "ERROR"
+                            %}
+
+
+                                <span
+                                    class="badge text-bg-danger"
+                                >
+
+                                    <i
+                                        class="bi bi-exclamation-circle me-1"
+                                    ></i>
+
+                                    ERROR
+
+                                </span>
+
+
+                            {% elif
+                                estado_actual == "ANULADA"
+                            %}
+
+
+                                <span
+                                    class="badge text-bg-secondary"
+                                >
+
+                                    ANULADA
+
+                                </span>
+
+
+                            {% else %}
+
+
+                                <span
+                                    class="badge text-bg-warning"
+                                >
+
+                                    <i
+                                        class="bi bi-clock me-1"
+                                    ></i>
+
+                                    PENDIENTE
+
+                                </span>
+
+
+                            {% endif %}
+
+
+                        </td>
+
+
+                        <!-- =================================
+                             TOTAL
+                        ================================== -->
+
+                        <td class="text-end">
+
+
+                            <strong>
+
+
+                                {% if
+                                    moneda_actual
+                                    == "PEN"
+                                %}
+
+                                    S/
+
+                                {% else %}
+
+                                    US$
+
+                                {% endif %}
+
+
+                                {{
+                                    "%.2f"|format(
+                                        boleta.total
+                                    )
+                                }}
+
+
+                            </strong>
+
+
+                        </td>
+
+
+                        <!-- =================================
+                             ACCIONES
+                        ================================== -->
+
+                        <td class="text-end pe-4">
+
+
+                            <!-- DETALLE -->
+
+                            <a
+                                href="{{ url_for(
+                                    'boletas_admin.detalle',
+                                    id_boleta=boleta.id_boleta
+                                ) }}"
+
+                                class="btn btn-sm btn-outline-primary"
+
+                                title="Consultar"
+                            >
+
+                                <i class="bi bi-eye"></i>
+
+                            </a>
+
+
+                            <!-- =================================
+                                 PDF
+                            ================================== -->
+
+                            {% if boleta.enlace_pdf %}
+
+
+                                <!-- VISUALIZAR -->
+
+                                <a
+                                    href="{{ boleta.enlace_pdf }}"
+
+                                    target="_blank"
+
+                                    rel="noopener noreferrer"
+
+                                    class="btn btn-sm btn-outline-secondary"
+
+                                    title="Visualizar PDF"
+                                >
+
+                                    <i
+                                        class="bi bi-file-earmark-pdf"
+                                    ></i>
+
+                                </a>
+
+
+                                <!-- DESCARGAR -->
+
+                                <a
+                                    href="{{ url_for(
+                                        'boletas_admin.descargar',
+                                        id_boleta=boleta.id_boleta,
+                                        tipo='pdf'
+                                    ) }}"
+
+                                    class="btn btn-sm btn-outline-success"
+
+                                    title="Descargar PDF"
+                                >
+
+                                    <i class="bi bi-download"></i>
+
+                                </a>
+
+
+                            {% endif %}
+
+
+                        </td>
+
+
+                    </tr>
+
+
+                {% else %}
+
+
+                    <tr>
+
+
+                        <td
+                            colspan="7"
+                            class="text-center py-5"
+                        >
+
+
+                            <i
+                                class="bi bi-receipt fs-1 text-muted"
+                            ></i>
+
+
+                            <div class="text-muted mt-2">
+
+                                No se encontraron boletas.
+
+                            </div>
+
+
+                            {% if
+                                buscar
+                                or estado
+                                or id_vendedor
+                            %}
+
+
+                                <div class="mt-3">
+
+                                    <a
+                                        href="{{ url_for(
+                                            'boletas_admin.lista'
+                                        ) }}"
+                                        class="btn btn-sm btn-outline-secondary"
+                                    >
+
+                                        Mostrar todas
+
+                                    </a>
+
+                                </div>
+
+
+                            {% endif %}
+
+
+                        </td>
+
+
+                    </tr>
+
+
+                {% endfor %}
+
+
+                </tbody>
+
+
+            </table>
+
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =================================================
+         PAGINACION
+    ================================================== -->
+
+    {% if
+        hay_anterior
+        or hay_siguiente
+    %}
+
+
+        <div
+            class="card-footer bg-white border-0 px-4 py-3"
+        >
+
+
+            <div
+                class="
+                    d-flex
+                    flex-wrap
+                    justify-content-between
+                    align-items-center
+                    gap-3
+                "
+            >
+
+
+                <!-- =========================================
+                     INFORMACION
+                ========================================== -->
+
+                <div class="small text-muted">
+
+
+                    Página
+
+                    <strong>
+
+                        {{ pagina }}
+
+                    </strong>
+
+
+                    <span class="mx-1">
+                        ·
+                    </span>
+
+
+                    Máximo
+
+                    <strong>
+
+                        {{ por_pagina }}
+
+                    </strong>
+
+                    boletas por página
+
+
+                </div>
+
+
+                <!-- =========================================
+                     NAVEGACION
+                ========================================== -->
+
+                <div class="btn-group">
+
+
+                    <!-- =====================================
+                         ANTERIOR
+                    ====================================== -->
+
+                    {% if hay_anterior %}
+
+
+                        <a
+                            href="{{ url_for(
+                                'boletas_admin.lista',
+
+                                pagina=pagina - 1,
+
+                                buscar=buscar,
+
+                                estado=estado,
+
+                                id_vendedor=(
+                                    id_vendedor
+                                    or ''
+                                )
+                            ) }}"
+
+                            class="btn btn-sm btn-outline-secondary"
+                        >
+
+                            <i
+                                class="bi bi-chevron-left me-1"
+                            ></i>
+
+                            Anterior
+
+                        </a>
+
+
+                    {% else %}
+
+
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            disabled
+                        >
+
+                            <i
+                                class="bi bi-chevron-left me-1"
+                            ></i>
+
+                            Anterior
+
+                        </button>
+
+
+                    {% endif %}
+
+
+                    <!-- PAGINA -->
+
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-light border"
+                        disabled
+                    >
+
+                        {{ pagina }}
+
+                    </button>
+
+
+                    <!-- =====================================
+                         SIGUIENTE
+                    ====================================== -->
+
+                    {% if hay_siguiente %}
+
+
+                        <a
+                            href="{{ url_for(
+                                'boletas_admin.lista',
+
+                                pagina=pagina + 1,
+
+                                buscar=buscar,
+
+                                estado=estado,
+
+                                id_vendedor=(
+                                    id_vendedor
+                                    or ''
+                                )
+                            ) }}"
+
+                            class="btn btn-sm btn-outline-primary"
+                        >
+
+                            Siguiente
+
+                            <i
+                                class="bi bi-chevron-right ms-1"
+                            ></i>
+
+                        </a>
+
+
+                    {% else %}
+
+
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-primary"
+                            disabled
+                        >
+
+                            Siguiente
+
+                            <i
+                                class="bi bi-chevron-right ms-1"
+                            ></i>
+
+                        </button>
+
+
+                    {% endif %}
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    {% endif %}
+
+
+</div>
+
+
+{% endblock %}

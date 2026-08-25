@@ -1,0 +1,1075 @@
+{% extends "administrador/base.html" %}
+
+
+{% block titulo %}
+
+    {% if usuario %}
+        Editar Usuario
+    {% else %}
+        Nuevo Usuario
+    {% endif %}
+
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<div class="mb-4">
+
+    <h1 class="h3 mb-1">
+
+        {% if usuario %}
+
+            Editar usuario
+
+        {% else %}
+
+            Registrar usuario
+
+        {% endif %}
+
+    </h1>
+
+</div>
+
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body p-4">
+
+
+        <form method="POST">
+
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+
+            <!-- GEOAPIFY -->
+
+            <input
+                type="hidden"
+                name="geoapify_place_id"
+                id="geoapifyPlaceId"
+                value="{{
+                    usuario.geoapify_place_id
+                    if usuario and usuario.geoapify_place_id
+                    else ''
+                }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="latitud"
+                id="latitud"
+                value="{{
+                    usuario.latitud
+                    if usuario and usuario.latitud is not none
+                    else ''
+                }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="longitud"
+                id="longitud"
+                value="{{
+                    usuario.longitud
+                    if usuario and usuario.longitud is not none
+                    else ''
+                }}"
+            >
+
+
+            <!-- API -->
+
+            <input
+                type="hidden"
+                name="datos_obtenidos_api"
+                id="datosObtenidosApi"
+                value="{{
+                    '1'
+                    if usuario and usuario.datos_obtenidos_api
+                    else '0'
+                }}"
+            >
+
+
+            <div class="row g-3">
+
+
+                <!-- TIPO DOCUMENTO -->
+
+                <div class="col-md-4">
+
+                    <label
+                        for="tipoDocumento"
+                        class="form-label"
+                    >
+                        Tipo de registro
+                    </label>
+
+
+                    <select
+                        class="form-select"
+                        name="tipo_documento"
+                        id="tipoDocumento"
+                        required
+                    >
+
+
+                        <option
+                            value="DNI"
+
+                            {% if
+                                usuario
+                                and usuario.tipo_documento.value == 'DNI'
+                            %}
+                                selected
+                            {% endif %}
+                        >
+
+                            DNI
+
+                        </option>
+
+
+                        <option
+                            value="SIN_DOCUMENTO"
+
+                            {% if
+                                not usuario
+                                or usuario.tipo_documento.value == 'SIN_DOCUMENTO'
+                            %}
+                                selected
+                            {% endif %}
+                        >
+
+                            Sin documento
+
+                        </option>
+
+
+                    </select>
+
+                </div>
+
+
+                <!-- DNI -->
+
+                <div
+                    class="col-md-5"
+                    id="contenedorDocumento"
+                >
+
+                    <label
+                        for="numeroDocumento"
+                        class="form-label"
+                    >
+                        DNI
+                    </label>
+
+
+                    <div class="input-group">
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="numero_documento"
+                            id="numeroDocumento"
+
+                            maxlength="8"
+
+                            inputmode="numeric"
+
+                            value="{{
+                                usuario.numero_documento
+                                if usuario and usuario.numero_documento
+                                else ''
+                            }}"
+                        >
+
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary"
+                            id="botonConsultarDni"
+                        >
+
+                            <i class="bi bi-search"></i>
+
+                            Consultar
+
+                        </button>
+
+
+                    </div>
+
+
+                    <div class="form-text">
+
+                        Consulte el DNI para completar nombres y apellidos.
+
+                    </div>
+
+                </div>
+
+
+                <!-- ROL -->
+
+                <div class="col-md-3">
+
+                    <label class="form-label">
+                        Rol
+                    </label>
+
+
+                    <select
+                        class="form-select"
+                        name="id_rol"
+                        required
+                    >
+
+                        <option value="">
+                            Seleccione
+                        </option>
+
+
+                        {% for rol in roles %}
+
+                            <option
+                                value="{{ rol.id_rol }}"
+
+                                {% if
+                                    usuario
+                                    and usuario.id_rol == rol.id_rol
+                                %}
+                                    selected
+                                {% endif %}
+                            >
+
+                                {{ rol.nombre }}
+
+                            </option>
+
+                        {% endfor %}
+
+
+                    </select>
+
+                </div>
+
+
+                <!-- NOMBRES -->
+
+                <div class="col-md-6">
+
+                    <label
+                        for="nombres"
+                        class="form-label"
+                    >
+                        Nombres
+                    </label>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="nombres"
+                        id="nombres"
+
+                        maxlength="120"
+
+                        value="{{
+                            usuario.nombres
+                            if usuario
+                            else ''
+                        }}"
+
+                        required
+                    >
+
+                </div>
+
+
+                <!-- APELLIDOS -->
+
+                <div class="col-md-6">
+
+                    <label
+                        for="apellidos"
+                        class="form-label"
+                    >
+                        Apellidos
+                    </label>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="apellidos"
+                        id="apellidos"
+
+                        maxlength="120"
+
+                        value="{{
+                            usuario.apellidos
+                            if usuario
+                            else ''
+                        }}"
+
+                        required
+                    >
+
+                </div>
+
+
+                <!-- CORREO -->
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+                        Correo electrónico
+                    </label>
+
+                    <input
+                        type="email"
+                        class="form-control"
+                        name="correo"
+
+                        maxlength="180"
+
+                        value="{{
+                            usuario.correo
+                            if usuario
+                            else ''
+                        }}"
+
+                        required
+                    >
+
+                </div>
+
+
+                <!-- CELULAR -->
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+                        Celular
+                    </label>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="celular"
+
+                        maxlength="30"
+
+                        value="{{
+                            usuario.celular
+                            if usuario and usuario.celular
+                            else ''
+                        }}"
+                    >
+
+                </div>
+
+
+                <!-- DIRECCIÓN -->
+
+                <div class="col-12">
+
+                    <label
+                        for="direccionUsuario"
+                        class="form-label"
+                    >
+                        Dirección
+                    </label>
+
+
+                    <div class="position-relative">
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="direccion"
+                            id="direccionUsuario"
+
+                            maxlength="300"
+
+                            autocomplete="off"
+
+                            value="{{
+                                usuario.direccion
+                                if usuario and usuario.direccion
+                                else ''
+                            }}"
+                        >
+
+
+                        <div
+                            id="resultadosDireccion"
+                            class="list-group position-absolute w-100 shadow"
+                            style="z-index: 1050;"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CONTRASEÑA -->
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+
+                        {% if usuario %}
+
+                            Nueva contraseña
+
+                        {% else %}
+
+                            Contraseña
+
+                        {% endif %}
+
+                    </label>
+
+
+                    <input
+                        type="password"
+                        class="form-control"
+
+                        name="{{
+                            'nueva_contrasena'
+                            if usuario
+                            else 'contrasena'
+                        }}"
+
+                        minlength="8"
+
+                        autocomplete="new-password"
+
+                        {% if not usuario %}
+                            required
+                        {% endif %}
+                    >
+
+
+                    {% if usuario %}
+
+                        <div class="form-text">
+
+                            Déjela vacía para conservar la contraseña actual.
+
+                        </div>
+
+                    {% endif %}
+
+
+                </div>
+
+
+            </div>
+
+
+            <hr class="my-4">
+
+
+            <div
+                class="d-flex justify-content-end gap-2"
+            >
+
+
+                <a
+                    href="{{ url_for(
+                        'usuarios.lista'
+                    ) }}"
+                    class="btn btn-outline-secondary"
+                >
+
+                    Cancelar
+
+                </a>
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+
+                    <i class="bi bi-save me-1"></i>
+
+                    Guardar
+
+                </button>
+
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+</div>
+
+
+{% endblock %}
+
+
+{% block scripts %}
+
+
+<script>
+
+
+    // =====================================================
+    // ELEMENTOS
+    // =====================================================
+
+
+    const tipoDocumento =
+        document.getElementById(
+            "tipoDocumento"
+        );
+
+
+    const contenedorDocumento =
+        document.getElementById(
+            "contenedorDocumento"
+        );
+
+
+    const numeroDocumento =
+        document.getElementById(
+            "numeroDocumento"
+        );
+
+
+    const botonConsultarDni =
+        document.getElementById(
+            "botonConsultarDni"
+        );
+
+
+    const nombres =
+        document.getElementById(
+            "nombres"
+        );
+
+
+    const apellidos =
+        document.getElementById(
+            "apellidos"
+        );
+
+
+    const datosObtenidosApi =
+        document.getElementById(
+            "datosObtenidosApi"
+        );
+
+
+    const direccion =
+        document.getElementById(
+            "direccionUsuario"
+        );
+
+
+    const resultadosDireccion =
+        document.getElementById(
+            "resultadosDireccion"
+        );
+
+
+    const geoapifyPlaceId =
+        document.getElementById(
+            "geoapifyPlaceId"
+        );
+
+
+    const latitud =
+        document.getElementById(
+            "latitud"
+        );
+
+
+    const longitud =
+        document.getElementById(
+            "longitud"
+        );
+
+
+    // =====================================================
+    // TIPO DOCUMENTO
+    // =====================================================
+
+
+    function actualizarDocumento() {
+
+
+        if (
+            tipoDocumento.value
+            === "SIN_DOCUMENTO"
+        ) {
+
+
+            contenedorDocumento.style.display =
+                "none";
+
+
+            numeroDocumento.value =
+                "";
+
+
+            datosObtenidosApi.value =
+                "0";
+
+
+        } else {
+
+
+            contenedorDocumento.style.display =
+                "";
+
+
+        }
+
+
+    }
+
+
+    tipoDocumento.addEventListener(
+        "change",
+        actualizarDocumento
+    );
+
+
+    actualizarDocumento();
+
+
+    // =====================================================
+    // DNI CAMBIADO MANUALMENTE
+    // =====================================================
+
+
+    numeroDocumento.addEventListener(
+        "input",
+        function () {
+
+
+            datosObtenidosApi.value =
+                "0";
+
+
+            numeroDocumento.value =
+                numeroDocumento.value
+                    .replace(
+                        /\D/g,
+                        ""
+                    )
+                    .slice(
+                        0,
+                        8
+                    );
+
+
+        }
+    );
+
+
+    nombres.addEventListener(
+        "input",
+        function () {
+
+            datosObtenidosApi.value =
+                "0";
+
+        }
+    );
+
+
+    apellidos.addEventListener(
+        "input",
+        function () {
+
+            datosObtenidosApi.value =
+                "0";
+
+        }
+    );
+
+
+    // =====================================================
+    // CONSULTAR DNI
+    // =====================================================
+
+
+    botonConsultarDni.addEventListener(
+        "click",
+        async function () {
+
+
+            const dni =
+                numeroDocumento.value.trim();
+
+
+            if (
+                !/^\d{8}$/.test(
+                    dni
+                )
+            ) {
+
+
+                alert(
+                    "Ingrese un DNI válido de 8 dígitos."
+                );
+
+
+                return;
+
+
+            }
+
+
+            const textoOriginal =
+                botonConsultarDni.innerHTML;
+
+
+            botonConsultarDni.disabled =
+                true;
+
+
+            botonConsultarDni.innerHTML =
+                `
+                    <span
+                        class="spinner-border spinner-border-sm me-1"
+                    ></span>
+
+                    Consultando
+                `;
+
+
+            try {
+
+
+                const respuesta =
+                    await fetch(
+                        `/integraciones/dni/${dni}`
+                    );
+
+
+                const datos =
+                    await respuesta.json();
+
+
+                if (
+                    !respuesta.ok
+                    || !datos.exito
+                ) {
+
+
+                    throw new Error(
+                        datos.mensaje
+                        || "No se pudo consultar el DNI."
+                    );
+
+
+                }
+
+
+                nombres.value =
+                    datos.nombres
+                    || "";
+
+
+                apellidos.value =
+                    datos.apellidos
+                    || "";
+
+
+                datosObtenidosApi.value =
+                    "1";
+
+
+            }
+
+            catch (error) {
+
+
+                datosObtenidosApi.value =
+                    "0";
+
+
+                alert(
+                    error.message
+                );
+
+
+            }
+
+            finally {
+
+
+                botonConsultarDni.disabled =
+                    false;
+
+
+                botonConsultarDni.innerHTML =
+                    textoOriginal;
+
+
+            }
+
+
+        }
+    );
+
+
+    // =====================================================
+    // GEOAPIFY
+    // =====================================================
+
+
+    let temporizadorDireccion;
+
+
+    direccion.addEventListener(
+        "input",
+        function () {
+
+
+            clearTimeout(
+                temporizadorDireccion
+            );
+
+
+            geoapifyPlaceId.value =
+                "";
+
+
+            latitud.value =
+                "";
+
+
+            longitud.value =
+                "";
+
+
+            const texto =
+                direccion.value.trim();
+
+
+            if (
+                texto.length < 3
+            ) {
+
+
+                resultadosDireccion.innerHTML =
+                    "";
+
+
+                return;
+
+
+            }
+
+
+            temporizadorDireccion =
+                setTimeout(
+                    function () {
+
+                        buscarDireccion(
+                            texto
+                        );
+
+                    },
+                    400
+                );
+
+
+        }
+    );
+
+
+    async function buscarDireccion(
+        texto
+    ) {
+
+
+        try {
+
+
+            const respuesta =
+                await fetch(
+                    `/integraciones/direcciones?q=${
+                        encodeURIComponent(
+                            texto
+                        )
+                    }`
+                );
+
+
+            const datos =
+                await respuesta.json();
+
+
+            if (
+                !respuesta.ok
+                || !datos.exito
+            ) {
+
+
+                resultadosDireccion.innerHTML =
+                    "";
+
+
+                return;
+
+
+            }
+
+
+            mostrarDirecciones(
+                datos.resultados
+            );
+
+
+        }
+
+        catch (error) {
+
+
+            resultadosDireccion.innerHTML =
+                "";
+
+
+        }
+
+
+    }
+
+
+    function mostrarDirecciones(
+        resultados
+    ) {
+
+
+        resultadosDireccion.innerHTML =
+            "";
+
+
+        resultados.forEach(
+            function (
+                resultado
+            ) {
+
+
+                const boton =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                boton.type =
+                    "button";
+
+
+                boton.className =
+                    "list-group-item "
+                    + "list-group-item-action";
+
+
+                boton.textContent =
+                    resultado.direccion;
+
+
+                boton.addEventListener(
+                    "click",
+                    function () {
+
+
+                        direccion.value =
+                            resultado.direccion;
+
+
+                        geoapifyPlaceId.value =
+                            resultado.place_id
+                            || "";
+
+
+                        latitud.value =
+                            resultado.latitud
+                            ?? "";
+
+
+                        longitud.value =
+                            resultado.longitud
+                            ?? "";
+
+
+                        resultadosDireccion.innerHTML =
+                            "";
+
+
+                    }
+                );
+
+
+                resultadosDireccion.appendChild(
+                    boton
+                );
+
+
+            }
+        );
+
+
+    }
+
+
+    // =====================================================
+    // CERRAR RESULTADOS
+    // =====================================================
+
+
+    document.addEventListener(
+        "click",
+        function (
+            evento
+        ) {
+
+
+            if (
+                !resultadosDireccion.contains(
+                    evento.target
+                )
+                &&
+                evento.target
+                !== direccion
+            ) {
+
+
+                resultadosDireccion.innerHTML =
+                    "";
+
+
+            }
+
+
+        }
+    );
+
+
+</script>
+
+
+{% endblock %}

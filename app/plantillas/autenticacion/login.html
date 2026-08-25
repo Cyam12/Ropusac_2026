@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>
+        Iniciar sesión | ROPUSAC
+    </title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    >
+
+    <link
+        rel="icon"
+        type="image/jpeg"
+        href="https://i.ibb.co/3m2LXd2K/images-4.jpg"
+    >
+
+    <style>
+
+        /* =====================================================
+           BASE
+        ====================================================== */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+            margin: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Helvetica,
+                Arial,
+                sans-serif;
+            color: #182235;
+            background: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* =====================================================
+           LAYOUT
+        ====================================================== */
+
+        .login-layout {
+            width: 100%;
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns:
+                minmax(520px, 57%)
+                minmax(420px, 43%);
+        }
+
+        /* =====================================================
+           PANEL IZQUIERDO
+        ====================================================== */
+
+        .panel-marca {
+            position: relative;
+            min-height: 100vh;
+            overflow: hidden;
+            padding:
+                70px
+                clamp(55px, 7vw, 110px)
+                42px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            color: #ffffff;
+            background:
+                linear-gradient(
+                    145deg,
+                    #2343b7 0%,
+                    #2453db 42%,
+                    #1973d3 70%,
+                    #168f99 100%
+                );
+        }
+
+        .panel-marca::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(
+                    circle at 15% 18%,
+                    rgba(255, 255, 255, 0.10) 0,
+                    rgba(255, 255, 255, 0.05) 18%,
+                    transparent 34%
+                ),
+                radial-gradient(
+                    circle at 82% 80%,
+                    rgba(255, 255, 255, 0.08) 0,
+                    rgba(255, 255, 255, 0.03) 16%,
+                    transparent 30%
+                );
+            pointer-events: none;
+        }
+
+        .panel-marca::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(
+                    180deg,
+                    rgba(255, 255, 255, 0.02) 0%,
+                    rgba(255, 255, 255, 0.00) 100%
+                );
+            pointer-events: none;
+        }
+
+        /* =====================================================
+           DECORACIONES
+        ====================================================== */
+
+        .fondo-orbita-1,
+        .fondo-orbita-2,
+        .fondo-orbita-3 {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            pointer-events: none;
+        }
+
+        .fondo-orbita-1 {
+            width: 760px;
+            height: 760px;
+            right: -370px;
+            top: 40px;
+        }
+
+        .fondo-orbita-2 {
+            width: 620px;
+            height: 620px;
+            right: -300px;
+            top: 115px;
+            border-width: 1px;
+        }
+
+        .fondo-orbita-3 {
+            width: 470px;
+            height: 470px;
+            right: -215px;
+            top: 210px;
+            border-width: 1px;
+            opacity: 0.65;
+        }
+
+        .fondo-brillo {
+            position: absolute;
+            width: 420px;
+            height: 420px;
+            right: -120px;
+            bottom: -110px;
+            border-radius: 50%;
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(58, 236, 208, 0.18) 0%,
+                    rgba(58, 236, 208, 0.07) 35%,
+                    rgba(58, 236, 208, 0.00) 72%
+                );
+            filter: blur(8px);
+            pointer-events: none;
+        }
+
+        .fondo-lineas {
+            position: absolute;
+            right: 120px;
+            bottom: 120px;
+            width: 180px;
+            height: 180px;
+            opacity: 0.08;
+            background:
+                repeating-linear-gradient(
+                    -45deg,
+                    #ffffff 0,
+                    #ffffff 2px,
+                    transparent 2px,
+                    transparent 12px
+                );
+            border-radius: 24px;
+            pointer-events: none;
+        }
+
+        .fondo-puntos {
+            position: absolute;
+            left: 70px;
+            bottom: 90px;
+            width: 130px;
+            height: 60px;
+            opacity: 0.13;
+            background-image:
+                radial-gradient(#ffffff 1.6px, transparent 1.6px);
+            background-size: 18px 18px;
+            pointer-events: none;
+        }
+
+        /* =====================================================
+           CABECERA IZQUIERDA
+        ====================================================== */
+
+        .marca-superior {
+            position: relative;
+            z-index: 4;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .marca-icono {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 29px;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(8px);
+        }
+
+        .marca-nombre {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 4px;
+        }
+
+        .marca-subtitulo {
+            margin-top: 4px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.70);
+        }
+
+        /* =====================================================
+           CONTENIDO IZQUIERDO
+        ====================================================== */
+
+        .marca-contenido {
+            position: relative;
+            z-index: 4;
+            max-width: 660px;
+            margin-top: 30px;
+            margin-bottom: auto;
+        }
+
+        .simbolo-principal {
+            width: 94px;
+            height: 94px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .simbolo-principal span {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 74px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 999px;
+            transform-origin: center;
+            margin-left: -37px;
+            margin-top: -5px;
+        }
+
+        .simbolo-principal span:nth-child(1) {
+            transform: rotate(0deg);
+        }
+
+        .simbolo-principal span:nth-child(2) {
+            transform: rotate(45deg);
+        }
+
+        .simbolo-principal span:nth-child(3) {
+            transform: rotate(90deg);
+        }
+
+        .simbolo-principal span:nth-child(4) {
+            transform: rotate(135deg);
+        }
+
+        .saludo {
+            margin: 0 0 6px 0;
+            font-size: clamp(40px, 4vw, 64px);
+            line-height: 1;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        .marca-titulo {
+            margin: 0 0 22px 0;
+            font-size: clamp(62px, 7vw, 96px);
+            line-height: 0.98;
+            font-weight: 900;
+            letter-spacing: -3px;
+        }
+
+        .marca-descripcion {
+            max-width: 700px;
+            margin: 0;
+            font-size: clamp(17px, 1.8vw, 22px);
+            line-height: 1.55;
+            color: rgba(255, 255, 255, 0.84);
+        }
+
+        /* =====================================================
+           FOOTER IZQUIERDO
+        ====================================================== */
+
+        .marca-footer {
+            position: relative;
+            z-index: 4;
+            margin-top: 40px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.52);
+        }
+
+        /* =====================================================
+           PANEL DERECHO
+        ====================================================== */
+
+        .panel-login {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding:
+                60px
+                clamp(40px, 6vw, 95px);
+            background:
+                linear-gradient(
+                    160deg,
+                    #ffffff 0%,
+                    #ffffff 72%,
+                    #f7fbff 100%
+                );
+        }
+
+        .panel-login::before {
+            content: "";
+            position: absolute;
+            width: 360px;
+            height: 360px;
+            right: -190px;
+            top: -190px;
+            border-radius: 50%;
+            background: rgba(14, 122, 214, 0.04);
+        }
+
+        .login-contenido {
+            position: relative;
+            z-index: 3;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .login-logo-movil {
+            display: none;
+        }
+
+        .login-etiqueta {
+            margin-bottom: 10px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #0976d0;
+            text-transform: uppercase;
+        }
+
+        .login-titulo {
+            margin: 0 0 10px 0;
+            font-size: clamp(34px, 3vw, 45px);
+            line-height: 1.08;
+            font-weight: 800;
+            letter-spacing: -1.3px;
+            color: #172033;
+        }
+
+        .login-descripcion {
+            margin-bottom: 36px;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #7b8698;
+        }
+
+        /* =====================================================
+           FORM
+        ====================================================== */
+
+        .form-label {
+            margin-bottom: 9px;
+            color: #313b4e;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .campo {
+            position: relative;
+        }
+
+        .campo-icono {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 4;
+            color: #9aa4b4;
+            font-size: 17px;
+            pointer-events: none;
+        }
+
+        .form-control {
+            height: 57px;
+            padding: 0 52px;
+            border-radius: 14px;
+            border: 1px solid #dce3ec;
+            background: #fbfcfe;
+            color: #20293b;
+            font-size: 15px;
+            box-shadow: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-control::placeholder {
+            color: #aab2c0;
+        }
+
+        .form-control:hover {
+            border-color: #c9d3df;
+            background: #ffffff;
+        }
+
+        .form-control:focus {
+            border-color: #0b7ddb;
+            background: #ffffff;
+            box-shadow:
+                0 0 0 4px rgba(11, 125, 219, 0.10);
+        }
+
+        .boton-contrasena {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 5;
+            width: 41px;
+            height: 41px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+            border-radius: 11px;
+            color: #8a94a5;
+            background: transparent;
+        }
+
+        .boton-contrasena:hover {
+            color: #0875ce;
+            background: #eef5fb;
+        }
+
+        .btn-login {
+            width: 100%;
+            height: 57px;
+            margin-top: 8px;
+            border: 0;
+            border-radius: 14px;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 750;
+            background:
+                linear-gradient(
+                    90deg,
+                    #0868d7 0%,
+                    #078dd0 57%,
+                    #05a6b7 100%
+                );
+            box-shadow:
+                0 13px 28px rgba(8, 112, 203, 0.21);
+            transition:
+                transform 0.18s ease,
+                box-shadow 0.18s ease;
+        }
+
+        .btn-login:hover {
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow:
+                0 17px 34px rgba(8, 112, 203, 0.28);
+        }
+
+        /* =====================================================
+           ALERTAS
+        ====================================================== */
+
+        .alert {
+            margin-bottom: 25px;
+            padding: 14px 16px;
+            border: 0;
+            border-radius: 13px;
+            font-size: 13px;
+        }
+
+        .alert-success {
+            color: #126348;
+            background: #e5f5ef;
+        }
+
+        .alert-danger {
+            color: #9e2936;
+            background: #fdecee;
+        }
+
+        .alert-warning {
+            color: #805d0b;
+            background: #fff4d7;
+        }
+
+        /* =====================================================
+           FOOTER LOGIN
+        ====================================================== */
+
+        .login-separador {
+            width: 100%;
+            height: 1px;
+            margin:
+                34px 0 24px 0;
+            background:
+                linear-gradient(
+                    90deg,
+                    transparent,
+                    #dfe5ec,
+                    transparent
+                );
+        }
+
+        .login-info {
+            color: #a1a9b6;
+            font-size: 11px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .login-seguridad {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            margin-top: 9px;
+            color: #b0b7c2;
+            font-size: 10.5px;
+        }
+
+        /* =====================================================
+           RESPONSIVE
+        ====================================================== */
+
+        @media (max-width: 1100px) {
+
+            .login-layout {
+                grid-template-columns:
+                    52%
+                    48%;
+            }
+
+            .panel-marca {
+                padding:
+                    55px
+                    48px
+                    38px;
+            }
+
+            .marca-titulo {
+                font-size: 74px;
+            }
+
+            .marca-descripcion {
+                font-size: 18px;
+            }
+
+            .fondo-orbita-1 {
+                width: 620px;
+                height: 620px;
+                right: -320px;
+            }
+
+            .fondo-orbita-2 {
+                width: 500px;
+                height: 500px;
+                right: -250px;
+            }
+
+            .fondo-orbita-3 {
+                width: 380px;
+                height: 380px;
+                right: -180px;
+            }
+
+        }
+
+        @media (max-width: 850px) {
+
+            body {
+                background:
+                    linear-gradient(
+                        145deg,
+                        #2343b7,
+                        #168f99
+                    );
+            }
+
+            .login-layout {
+                display: flex;
+                min-height: 100vh;
+                padding: 25px;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .panel-marca {
+                display: none;
+            }
+
+            .panel-login {
+                width: 100%;
+                max-width: 540px;
+                min-height: auto;
+                padding:
+                    48px
+                    40px;
+                border-radius: 25px;
+                box-shadow:
+                    0 30px 75px rgba(0, 35, 75, 0.25);
+            }
+
+            .login-logo-movil {
+                width: 60px;
+                height: 60px;
+                margin-bottom: 27px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 17px;
+                color: #ffffff;
+                font-size: 26px;
+                background:
+                    linear-gradient(
+                        135deg,
+                        #2343b7,
+                        #168f99
+                    );
+            }
+
+        }
+
+        @media (max-width: 520px) {
+
+            .login-layout {
+                padding: 0;
+                align-items: stretch;
+            }
+
+            .panel-login {
+                min-height: 100vh;
+                padding:
+                    42px
+                    24px;
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .login-contenido {
+                margin: auto;
+            }
+
+            .login-titulo {
+                font-size: 34px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<main class="login-layout">
+
+    <!-- =====================================================
+         IZQUIERDA
+    ====================================================== -->
+
+    <section class="panel-marca">
+
+        <div class="fondo-orbita-1"></div>
+        <div class="fondo-orbita-2"></div>
+        <div class="fondo-orbita-3"></div>
+        <div class="fondo-brillo"></div>
+        <div class="fondo-lineas"></div>
+        <div class="fondo-puntos"></div>
+
+        <div class="marca-superior">
+
+            <div class="marca-icono">
+                <i class="bi bi-box-seam"></i>
+            </div>
+
+            <div>
+                <div class="marca-nombre">
+                    ROPUSAC
+                </div>
+                <div class="marca-subtitulo">
+                    Gestión Comercial Empresarial
+                </div>
+            </div>
+
+        </div>
+
+        <div class="marca-contenido">
+
+            <div class="simbolo-principal">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <h2 class="saludo">
+                Hola,
+            </h2>
+
+            <h1 class="marca-titulo">
+                ROPUSAC
+            </h1>
+
+            <p class="marca-descripcion">
+                Gestiona cotizaciones, clientes,
+                productos, proveedores, costos y
+                disponibilidad desde una sola plataforma.
+            </p>
+
+        </div>
+
+        <div class="marca-footer">
+            © 2026 ROPUSAC. Robinson Puse S.A.C.
+        </div>
+
+    </section>
+
+    <!-- =====================================================
+         LOGIN
+    ====================================================== -->
+
+    <section class="panel-login">
+
+        <div class="login-contenido">
+
+            <div class="login-logo-movil">
+                <i class="bi bi-box-seam"></i>
+            </div>
+
+            <div class="login-etiqueta">
+                ROPUSAC
+            </div>
+
+            <h2 class="login-titulo">
+                Bienvenido.
+            </h2>
+
+            <p class="login-descripcion">
+                Ingresa tus credenciales para acceder
+                al sistema de gestión comercial.
+            </p>
+
+            {% with mensajes = get_flashed_messages(
+                with_categories=true
+            ) %}
+
+                {% if mensajes %}
+
+                    {% for categoria, mensaje in mensajes %}
+
+                        <div
+                            class="alert alert-{{ categoria }} d-flex align-items-center gap-2"
+                            role="alert"
+                        >
+
+                            {% if categoria == "danger" %}
+
+                                <i class="bi bi-exclamation-circle-fill"></i>
+
+                            {% elif categoria == "success" %}
+
+                                <i class="bi bi-check-circle-fill"></i>
+
+                            {% elif categoria == "warning" %}
+
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+
+                            {% else %}
+
+                                <i class="bi bi-info-circle-fill"></i>
+
+                            {% endif %}
+
+                            <div>
+                                {{ mensaje }}
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                {% endif %}
+
+            {% endwith %}
+
+            <form method="POST">
+
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
+                <div class="mb-4">
+
+                    <label
+                        for="correo"
+                        class="form-label"
+                    >
+                        Correo electrónico
+                    </label>
+
+                    <div class="campo">
+
+                        <i class="bi bi-envelope campo-icono"></i>
+
+                        <input
+                            type="email"
+                            class="form-control"
+                            id="correo"
+                            name="correo"
+                            value="{{ correo or '' }}"
+                            maxlength="180"
+                            autocomplete="email"
+                            placeholder="nombre@empresa.com"
+                            required
+                            autofocus
+                        >
+
+                    </div>
+
+                </div>
+
+                <div class="mb-4">
+
+                    <label
+                        for="contrasena"
+                        class="form-label"
+                    >
+                        Contraseña
+                    </label>
+
+                    <div class="campo">
+
+                        <i class="bi bi-lock campo-icono"></i>
+
+                        <input
+                            type="password"
+                            class="form-control"
+                            id="contrasena"
+                            name="contrasena"
+                            autocomplete="current-password"
+                            placeholder="Ingresa tu contraseña"
+                            required
+                        >
+
+                        <button
+                            class="boton-contrasena"
+                            type="button"
+                            id="mostrarContrasena"
+                            aria-label="Mostrar contraseña"
+                            title="Mostrar contraseña"
+                        >
+
+                            <i
+                                class="bi bi-eye"
+                                id="iconoContrasena"
+                            ></i>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="btn btn-login"
+                >
+                    Iniciar sesión
+                    <i class="bi bi-arrow-right ms-2"></i>
+                </button>
+
+            </form>
+
+            <div class="login-separador"></div>
+
+            <div class="login-info">
+                Sistema de Ventas, Cotizaciones y Facturación
+                <br>
+                ROPUSAC
+            </div>
+
+            <div class="login-seguridad">
+                <i class="bi bi-shield-lock"></i>
+                Acceso protegido
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script>
+
+    const boton = document.getElementById(
+        "mostrarContrasena"
+    );
+
+    const input = document.getElementById(
+        "contrasena"
+    );
+
+    const icono = document.getElementById(
+        "iconoContrasena"
+    );
+
+    boton.addEventListener(
+        "click",
+        function () {
+
+            const oculto =
+                input.type === "password";
+
+            input.type =
+                oculto
+                    ? "text"
+                    : "password";
+
+            icono.classList.toggle(
+                "bi-eye",
+                !oculto
+            );
+
+            icono.classList.toggle(
+                "bi-eye-slash",
+                oculto
+            );
+
+            boton.setAttribute(
+                "aria-label",
+                oculto
+                    ? "Ocultar contraseña"
+                    : "Mostrar contraseña"
+            );
+
+            boton.setAttribute(
+                "title",
+                oculto
+                    ? "Ocultar contraseña"
+                    : "Mostrar contraseña"
+            );
+
+        }
+    );
+
+</script>
+
+</body>
+</html>

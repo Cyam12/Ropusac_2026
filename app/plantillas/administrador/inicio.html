@@ -1,0 +1,578 @@
+{% extends "administrador/base.html" %}
+
+
+{% block titulo %}
+Dashboard
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<!-- =====================================================
+     CABECERA
+====================================================== -->
+
+<div class="mb-4">
+
+    <h1 class="h3 mb-1">
+        Dashboard Administrador
+    </h1>
+
+    <p class="text-muted mb-0">
+        Panel general de administración de ROPUSAC.
+    </p>
+
+</div>
+
+
+<!-- =====================================================
+     INDICADORES
+====================================================== -->
+
+<div class="row g-4 mb-5">
+
+
+    <!-- =================================================
+         USUARIOS
+    ================================================== -->
+
+    <div class="col-md-6 col-xl">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body p-4">
+
+                <div
+                    class="d-flex justify-content-between align-items-start"
+                >
+
+                    <div>
+
+                        <div class="text-muted small mb-2">
+
+                            Usuarios Registrados
+
+                        </div>
+
+
+                        <div class="display-6 fw-semibold">
+
+                            {{ usuarios_registrados }}
+
+                        </div>
+
+
+                        <div class="small text-muted mt-2">
+
+                            Usuarios del sistema
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="bg-light rounded p-3">
+
+                        <i
+                            class="bi bi-people fs-2"
+                        ></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         PROVEEDORES
+    ================================================== -->
+
+    <div class="col-md-6 col-xl">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body p-4">
+
+                <div
+                    class="d-flex justify-content-between align-items-start"
+                >
+
+                    <div>
+
+                        <div class="text-muted small mb-2">
+
+                            Proveedores Registrados
+
+                        </div>
+
+
+                        <div class="display-6 fw-semibold">
+
+                            {{ proveedores_registrados }}
+
+                        </div>
+
+
+                        <div class="small text-muted mt-2">
+
+                            Proveedores del sistema
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="bg-light rounded p-3">
+
+                        <i
+                            class="bi bi-truck fs-2"
+                        ></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         CLIENTES
+    ================================================== -->
+
+    <div class="col-md-6 col-xl">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body p-4">
+
+                <div
+                    class="d-flex justify-content-between align-items-start"
+                >
+
+                    <div>
+
+                        <div class="text-muted small mb-2">
+
+                            Clientes Registrados
+
+                        </div>
+
+
+                        <div class="display-6 fw-semibold">
+
+                            {{ clientes_registrados }}
+
+                        </div>
+
+
+                        <div class="small text-muted mt-2">
+
+                            Clientes del sistema
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="bg-light rounded p-3">
+
+                        <i
+                            class="bi bi-person-vcard fs-2"
+                        ></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         PRODUCTOS
+    ================================================== -->
+
+    <div class="col-md-6 col-xl">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body p-4">
+
+                <div
+                    class="d-flex justify-content-between align-items-start"
+                >
+
+                    <div>
+
+                        <div class="text-muted small mb-2">
+
+                            Productos Registrados
+
+                        </div>
+
+
+                        <div class="display-6 fw-semibold">
+
+                            {{ productos_registrados }}
+
+                        </div>
+
+
+                        <div class="small text-muted mt-2">
+
+                            Productos del catálogo
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="bg-light rounded p-3">
+
+                        <i
+                            class="bi bi-box-seam fs-2"
+                        ></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         BOLETAS
+    ================================================== -->
+
+    <div class="col-md-6 col-xl">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body p-4">
+
+                <div
+                    class="d-flex justify-content-between align-items-start"
+                >
+
+                    <div>
+
+                        <div class="text-muted small mb-2">
+
+                            Boletas Registradas
+
+                        </div>
+
+
+                        <div class="display-6 fw-semibold">
+
+                            {{ boletas_registradas }}
+
+                        </div>
+
+
+                        <div class="small text-muted mt-2">
+
+                            Comprobantes registrados
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="bg-light rounded p-3">
+
+                        <i
+                            class="bi bi-receipt fs-2"
+                        ></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     MODULOS
+====================================================== -->
+
+<h5 class="mb-3">
+    Administración
+</h5>
+
+
+<div class="row g-4">
+
+
+    <!-- =================================================
+         USUARIOS
+    ================================================== -->
+
+    <div class="col-md-6 col-xl-3">
+
+        <a
+            href="{{ url_for('usuarios.lista') }}"
+            class="text-decoration-none"
+        >
+
+            <div class="card tarjeta-modulo h-100">
+
+                <div class="card-body">
+
+                    <i class="bi bi-people fs-2"></i>
+
+                    <h5 class="mt-3">
+                        Usuarios
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Administrar usuarios y roles.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <!-- =================================================
+         PROVEEDORES
+    ================================================== -->
+
+    <div class="col-md-6 col-xl-3">
+
+        <a
+            href="{{ url_for('proveedores.lista') }}"
+            class="text-decoration-none"
+        >
+
+            <div class="card tarjeta-modulo h-100">
+
+                <div class="card-body">
+
+                    <i class="bi bi-truck fs-2"></i>
+
+                    <h5 class="mt-3">
+                        Proveedores
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Administrar proveedores.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <!-- =================================================
+         CLIENTES
+    ================================================== -->
+
+    <div class="col-md-6 col-xl-3">
+
+        <a
+            href="{{ url_for('clientes.lista') }}"
+            class="text-decoration-none"
+        >
+
+            <div class="card tarjeta-modulo h-100">
+
+                <div class="card-body">
+
+                    <i class="bi bi-person-vcard fs-2"></i>
+
+                    <h5 class="mt-3">
+                        Clientes
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Consultar y administrar clientes.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <!-- =================================================
+         PRODUCTOS
+    ================================================== -->
+
+    <div class="col-md-6 col-xl-3">
+
+        <a
+            href="{{ url_for('productos.lista') }}"
+            class="text-decoration-none"
+        >
+
+            <div class="card tarjeta-modulo h-100">
+
+                <div class="card-body">
+
+                    <i class="bi bi-box-seam fs-2"></i>
+
+                    <h5 class="mt-3">
+                        Productos
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Administrar catálogo y precios base.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <!-- =================================================
+         PRECIOS DE VENTA
+    ================================================== -->
+
+    <div class="col-md-6 col-xl-3">
+
+        <a
+            href="{{ url_for('precios_venta.lista') }}"
+            class="text-decoration-none"
+        >
+
+            <div class="card tarjeta-modulo h-100">
+
+                <div class="card-body">
+
+                    <i class="bi bi-tags fs-2"></i>
+
+                    <h5 class="mt-3">
+                        Precios de Venta
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Definir precio final y stock.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <!-- =================================================
+         COTIZACIONES
+    ================================================== -->
+
+    <div class="col-md-6 col-xl-3">
+
+        <a
+            href="{{ url_for(
+                'cotizaciones_admin.lista'
+            ) }}"
+            class="text-decoration-none"
+        >
+
+            <div class="card tarjeta-modulo h-100">
+
+                <div class="card-body">
+
+                    <i
+                        class="bi bi-file-earmark-text fs-2"
+                    ></i>
+
+                    <h5 class="mt-3">
+                        Cotizaciones
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Consultar cotizaciones de vendedores.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <!-- =================================================
+         BOLETAS
+    ================================================== -->
+
+    <div class="col-md-6 col-xl-3">
+
+        <a
+            href="{{ url_for(
+                'boletas_admin.lista'
+            ) }}"
+            class="text-decoration-none"
+        >
+
+            <div class="card tarjeta-modulo h-100">
+
+                <div class="card-body">
+
+                    <i class="bi bi-receipt fs-2"></i>
+
+                    <h5 class="mt-3">
+                        Boletas
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Consultar comprobantes NubeFact.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,368 @@
+{% extends "vendedor/base.html" %}
+
+
+{% block titulo %}
+Detalle Cliente
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<div
+    class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"
+>
+
+    <div>
+
+        <h1 class="h3 mb-1">
+
+            {{ nombre_cliente }}
+
+        </h1>
+
+        <p class="text-muted mb-0">
+
+            Detalle del cliente
+
+        </p>
+
+    </div>
+
+
+    <div class="d-flex gap-2">
+
+        <a
+            href="{{ url_for(
+                'clientes_vendedor.lista'
+            ) }}"
+            class="btn btn-outline-secondary"
+        >
+            Volver
+        </a>
+
+
+        <a
+            href="{{ url_for(
+                'clientes_vendedor.editar',
+                id_cliente=cliente.id_cliente
+            ) }}"
+            class="btn btn-primary"
+        >
+
+            <i class="bi bi-pencil me-1"></i>
+
+            Editar contacto
+
+        </a>
+
+    </div>
+
+</div>
+
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body p-4">
+
+        <div class="row g-4">
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Tipo de documento
+                </small>
+
+                <div>
+
+                    {{
+                        cliente.tipo_documento.value
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Número de documento
+                </small>
+
+                <div>
+
+                    {{
+                        cliente.numero_documento
+                        or "Sin documento"
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Estado
+                </small>
+
+                <div>
+
+                    {% if cliente.activo %}
+
+                        <span
+                            class="badge text-bg-success"
+                        >
+                            Activo
+                        </span>
+
+                    {% else %}
+
+                        <span
+                            class="badge text-bg-secondary"
+                        >
+                            Inactivo
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            {% if cliente.razon_social %}
+
+                <div class="col-md-12">
+
+                    <small class="text-muted">
+                        Razón social
+                    </small>
+
+                    <div class="fw-semibold">
+
+                        {{ cliente.razon_social }}
+
+                    </div>
+
+                </div>
+
+            {% else %}
+
+                <div class="col-md-6">
+
+                    <small class="text-muted">
+                        Nombres
+                    </small>
+
+                    <div>
+                        {{ cliente.nombres }}
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <small class="text-muted">
+                        Apellidos
+                    </small>
+
+                    <div>
+                        {{ cliente.apellidos }}
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+            <hr>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Correo electrónico
+                </small>
+
+                <div>
+
+                    {{
+                        cliente.correo
+                        or "No registrado"
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Celular
+                </small>
+
+                <div>
+
+                    {{
+                        cliente.celular
+                        or "No registrado"
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Teléfono
+                </small>
+
+                <div>
+
+                    {{
+                        cliente.telefono
+                        or "No registrado"
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-12">
+
+                <small class="text-muted">
+                    Dirección
+                </small>
+
+                <div>
+
+                    {{
+                        cliente.direccion
+                        or "No registrada"
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <hr>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Registrado por
+                </small>
+
+                <div>
+
+                    {{ registrado_por }}
+
+                </div>
+
+                <small class="text-muted">
+
+                    {{ rol_registro }}
+
+                </small>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Fecha de registro
+                </small>
+
+                <div>
+
+                    {{
+                        cliente.creado_en.strftime(
+                            "%d/%m/%Y %H:%M"
+                        )
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Origen de datos
+                </small>
+
+                <div>
+
+                    {% if cliente.datos_obtenidos_api %}
+
+                        <span
+                            class="badge text-bg-info"
+                        >
+                            APIS.NET
+                        </span>
+
+                    {% else %}
+
+                        <span
+                            class="badge text-bg-light"
+                        >
+                            Registro manual
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Dirección Geoapify
+                </small>
+
+                <div>
+
+                    {% if cliente.geoapify_place_id %}
+
+                        <span
+                            class="badge text-bg-success"
+                        >
+                            Validada
+                        </span>
+
+                    {% else %}
+
+                        <span class="text-muted">
+                            No utilizada
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% endblock %}

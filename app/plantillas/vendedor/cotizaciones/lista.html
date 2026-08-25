@@ -1,0 +1,971 @@
+{% extends "vendedor/base.html" %}
+
+
+{% block titulo %}
+Cotizaciones
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<!-- =====================================================
+     CABECERA
+====================================================== -->
+
+<div
+    class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"
+>
+
+    <div>
+
+        <h1 class="h3 mb-1">
+            Cotizaciones
+        </h1>
+
+        <p class="text-muted mb-0">
+
+            Consulte las cotizaciones realizadas
+            por todos los vendedores.
+
+        </p>
+
+    </div>
+
+
+    <a
+        href="{{ url_for(
+            'cotizaciones_vendedor.nueva'
+        ) }}"
+        class="btn btn-primary"
+    >
+
+        <i class="bi bi-plus-circle me-1"></i>
+
+        Nueva cotización
+
+    </a>
+
+</div>
+
+
+<!-- =====================================================
+     INFORMACION
+====================================================== -->
+
+<div
+    class="alert alert-info border-0 shadow-sm"
+>
+
+    <i class="bi bi-info-circle me-2"></i>
+
+    Las cotizaciones son compartidas entre vendedores.
+    Desde esta pestaña se pueden crear, consultar,
+    visualizar, descargar y enviar, pero
+
+    <strong>
+        no pueden aprobarse
+    </strong>.
+
+</div>
+
+
+<!-- =====================================================
+     FILTROS
+====================================================== -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body">
+
+        <form
+            method="GET"
+            class="row g-2"
+        >
+
+
+            <!-- BUSCADOR -->
+
+            <div class="col-lg-5">
+
+                <div class="input-group">
+
+                    <span
+                        class="input-group-text bg-white"
+                    >
+
+                        <i class="bi bi-search"></i>
+
+                    </span>
+
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="buscar"
+                        value="{{ buscar }}"
+                        placeholder="Cotización, cliente, DNI/RUC o vendedor"
+                        autocomplete="off"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- ESTADO -->
+
+            <div class="col-lg-2">
+
+                <select
+                    class="form-select"
+                    name="estado"
+                >
+
+                    <option value="">
+                        Todos los estados
+                    </option>
+
+
+                    {% for item in estados %}
+
+                        <option
+                            value="{{ item }}"
+
+                            {% if
+                                estado == item
+                            %}
+                                selected
+                            {% endif %}
+                        >
+
+                            {{
+                                item.replace(
+                                    "_",
+                                    " "
+                                )
+                            }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- ORIGEN -->
+
+            <div class="col-lg-2">
+
+                <select
+                    class="form-select"
+                    name="origen"
+                >
+
+                    <option value="">
+
+                        Todos los vendedores
+
+                    </option>
+
+
+                    <option
+                        value="MIAS"
+
+                        {% if
+                            origen == "MIAS"
+                        %}
+                            selected
+                        {% endif %}
+                    >
+
+                        Creadas por mí
+
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- BUSCAR -->
+
+            <div class="col-auto">
+
+                <button
+                    class="btn btn-outline-primary"
+                    type="submit"
+                >
+
+                    <i class="bi bi-search me-1"></i>
+
+                    Buscar
+
+                </button>
+
+            </div>
+
+
+            <!-- LIMPIAR -->
+
+            <div class="col-auto">
+
+                <a
+                    href="{{ url_for(
+                        'cotizaciones_vendedor.lista'
+                    ) }}"
+                    class="btn btn-outline-secondary"
+                >
+
+                    Limpiar
+
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     TABLA
+====================================================== -->
+
+<div class="card border-0 shadow-sm">
+
+
+    <div class="card-body p-0">
+
+
+        <div class="table-responsive">
+
+
+            <table
+                class="table table-hover align-middle mb-0"
+            >
+
+
+                <thead class="table-light">
+
+
+                    <tr>
+
+
+                        <th class="ps-4">
+                            Cotización
+                        </th>
+
+
+                        <th>
+                            Cliente
+                        </th>
+
+
+                        <th>
+                            Vendedor
+                        </th>
+
+
+                        <th>
+                            Vigencia
+                        </th>
+
+
+                        <th>
+                            Estado
+                        </th>
+
+
+                        <th class="text-end">
+                            Total
+                        </th>
+
+
+                        <th class="text-end pe-4">
+                            Acciones
+                        </th>
+
+
+                    </tr>
+
+
+                </thead>
+
+
+                <tbody>
+
+
+                    {% for item in cotizaciones %}
+
+
+                        {% set cotizacion =
+                            item.cotizacion
+                        %}
+
+
+                        {% set estado_actual =
+                            texto_enum(
+                                cotizacion.estado
+                            )
+                        %}
+
+
+                        {% set moneda_actual =
+                            texto_enum(
+                                cotizacion.moneda
+                            )
+                        %}
+
+
+                        <tr>
+
+
+                            <!-- =================================
+                                 COTIZACION
+                            ================================== -->
+
+                            <td class="ps-4">
+
+
+                                <strong>
+
+                                    {{
+                                        cotizacion.numero_cotizacion
+                                    }}
+
+                                </strong>
+
+
+                                <div class="small text-muted">
+
+
+                                    {% if
+                                        cotizacion.fecha_emision
+                                    %}
+
+
+                                        {{
+                                            cotizacion.fecha_emision.strftime(
+                                                "%d/%m/%Y"
+                                            )
+                                        }}
+
+
+                                    {% else %}
+
+
+                                        Sin fecha
+
+
+                                    {% endif %}
+
+
+                                </div>
+
+
+                            </td>
+
+
+                            <!-- =================================
+                                 CLIENTE
+                            ================================== -->
+
+                            <td>
+
+
+                                <div class="fw-medium">
+
+                                    {{
+                                        item.cliente
+                                        or "Cliente no disponible"
+                                    }}
+
+                                </div>
+
+
+                            </td>
+
+
+                            <!-- =================================
+                                 VENDEDOR
+                            ================================== -->
+
+                            <td>
+
+
+                                {{ item.vendedor }}
+
+
+                                {% if item.es_mia %}
+
+
+                                    <div class="mt-1">
+
+                                        <span
+                                            class="badge text-bg-primary"
+                                        >
+
+                                            <i
+                                                class="bi bi-person-check me-1"
+                                            ></i>
+
+                                            Creada por mí
+
+                                        </span>
+
+                                    </div>
+
+
+                                {% endif %}
+
+
+                            </td>
+
+
+                            <!-- =================================
+                                 VIGENCIA
+                            ================================== -->
+
+                            <td>
+
+
+                                {% if
+                                    cotizacion.fecha_vigencia
+                                %}
+
+
+                                    {{
+                                        cotizacion.fecha_vigencia.strftime(
+                                            "%d/%m/%Y"
+                                        )
+                                    }}
+
+
+                                {% else %}
+
+
+                                    <span class="text-muted">
+
+                                        Sin fecha
+
+                                    </span>
+
+
+                                {% endif %}
+
+
+                            </td>
+
+
+                            <!-- =================================
+                                 ESTADO
+                            ================================== -->
+
+                            <td>
+
+
+                                {% if
+                                    estado_actual == "EMITIDA"
+                                %}
+
+
+                                    <span
+                                        class="badge text-bg-primary"
+                                    >
+
+                                        Emitida
+
+                                    </span>
+
+
+                                {% elif
+                                    estado_actual == "ENVIADA"
+                                %}
+
+
+                                    <span
+                                        class="badge text-bg-info"
+                                    >
+
+                                        Enviada
+
+                                    </span>
+
+
+                                {% elif
+                                    estado_actual == "APROBADA"
+                                %}
+
+
+                                    <span
+                                        class="badge text-bg-success"
+                                    >
+
+                                        Aprobada
+
+                                    </span>
+
+
+                                {% elif
+                                    estado_actual == "VENCIDA"
+                                %}
+
+
+                                    <span
+                                        class="badge text-bg-warning"
+                                    >
+
+                                        Vencida
+
+                                    </span>
+
+
+                                {% elif
+                                    estado_actual == "RECHAZADA"
+                                    or
+                                    estado_actual == "ANULADA"
+                                %}
+
+
+                                    <span
+                                        class="badge text-bg-danger"
+                                    >
+
+                                        {{
+                                            estado_actual.replace(
+                                                "_",
+                                                " "
+                                            )
+                                        }}
+
+                                    </span>
+
+
+                                {% elif
+                                    estado_actual
+                                    == "CONVERTIDA_VENTA"
+                                %}
+
+
+                                    <span
+                                        class="badge text-bg-success"
+                                    >
+
+                                        Convertida a venta
+
+                                    </span>
+
+
+                                {% else %}
+
+
+                                    <span
+                                        class="badge text-bg-secondary"
+                                    >
+
+                                        {{
+                                            estado_actual.replace(
+                                                "_",
+                                                " "
+                                            )
+                                        }}
+
+                                    </span>
+
+
+                                {% endif %}
+
+
+                            </td>
+
+
+                            <!-- =================================
+                                 TOTAL
+                            ================================== -->
+
+                            <td class="text-end">
+
+
+                                <strong>
+
+
+                                    {% if
+                                        moneda_actual
+                                        == "PEN"
+                                    %}
+
+                                        S/
+
+                                    {% else %}
+
+                                        US$
+
+                                    {% endif %}
+
+
+                                    {{
+                                        "%.2f"|format(
+                                            cotizacion.total
+                                        )
+                                    }}
+
+
+                                </strong>
+
+
+                            </td>
+
+
+                            <!-- =================================
+                                 ACCIONES
+                            ================================== -->
+
+                            <td class="text-end pe-4">
+
+
+                                <!-- CONSULTAR -->
+
+                                <a
+                                    href="{{ url_for(
+                                        'cotizaciones_vendedor.detalle',
+                                        id_cotizacion=cotizacion.id_cotizacion
+                                    ) }}"
+
+                                    class="btn btn-sm btn-outline-primary"
+
+                                    title="Consultar"
+                                >
+
+                                    <i class="bi bi-eye"></i>
+
+                                </a>
+
+
+                                <!-- =================================
+                                     PDF
+                                ================================== -->
+
+                                {% if cotizacion.pdf_url %}
+
+
+                                    <!-- VISUALIZAR -->
+
+                                    <a
+                                        href="{{ cotizacion.pdf_url }}"
+
+                                        target="_blank"
+
+                                        rel="noopener noreferrer"
+
+                                        class="btn btn-sm btn-outline-secondary"
+
+                                        title="Visualizar PDF"
+                                    >
+
+                                        <i
+                                            class="bi bi-file-earmark-pdf"
+                                        ></i>
+
+                                    </a>
+
+
+                                    <!-- DESCARGAR -->
+
+                                    <a
+                                        href="{{ cotizacion.pdf_url }}?descargar=1"
+
+                                        class="btn btn-sm btn-outline-success"
+
+                                        title="Descargar"
+                                    >
+
+                                        <i
+                                            class="bi bi-download"
+                                        ></i>
+
+                                    </a>
+
+
+                                {% endif %}
+
+
+                            </td>
+
+
+                        </tr>
+
+
+                    {% else %}
+
+
+                        <tr>
+
+
+                            <td
+                                colspan="7"
+                                class="text-center py-5"
+                            >
+
+
+                                <i
+                                    class="bi bi-file-earmark-text fs-1 text-muted"
+                                ></i>
+
+
+                                <div class="text-muted mt-2">
+
+                                    No existen cotizaciones.
+
+                                </div>
+
+
+                                {% if
+                                    buscar
+                                    or estado
+                                    or origen
+                                %}
+
+
+                                    <div class="mt-3">
+
+                                        <a
+                                            href="{{ url_for(
+                                                'cotizaciones_vendedor.lista'
+                                            ) }}"
+
+                                            class="btn btn-sm btn-outline-secondary"
+                                        >
+
+                                            Mostrar todas
+
+                                        </a>
+
+                                    </div>
+
+
+                                {% endif %}
+
+
+                            </td>
+
+
+                        </tr>
+
+
+                    {% endfor %}
+
+
+                </tbody>
+
+
+            </table>
+
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =================================================
+         PAGINACION
+    ================================================== -->
+
+    {% if
+        hay_anterior
+        or hay_siguiente
+    %}
+
+
+        <div
+            class="card-footer bg-white border-0 px-4 py-3"
+        >
+
+
+            <div
+                class="
+                    d-flex
+                    flex-wrap
+                    justify-content-between
+                    align-items-center
+                    gap-3
+                "
+            >
+
+
+                <!-- INFORMACION -->
+
+                <div class="small text-muted">
+
+
+                    Página
+
+                    <strong>
+
+                        {{ pagina }}
+
+                    </strong>
+
+
+                    <span class="mx-1">
+
+                        ·
+
+                    </span>
+
+
+                    Máximo
+
+                    <strong>
+
+                        {{ por_pagina }}
+
+                    </strong>
+
+                    cotizaciones por página
+
+
+                </div>
+
+
+                <!-- NAVEGACION -->
+
+                <div class="btn-group">
+
+
+                    <!-- ANTERIOR -->
+
+                    {% if hay_anterior %}
+
+
+                        <a
+                            href="{{ url_for(
+                                'cotizaciones_vendedor.lista',
+
+                                pagina=pagina - 1,
+
+                                buscar=buscar,
+
+                                estado=estado,
+
+                                origen=origen
+                            ) }}"
+
+                            class="btn btn-sm btn-outline-secondary"
+                        >
+
+                            <i
+                                class="bi bi-chevron-left me-1"
+                            ></i>
+
+                            Anterior
+
+                        </a>
+
+
+                    {% else %}
+
+
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            disabled
+                        >
+
+                            <i
+                                class="bi bi-chevron-left me-1"
+                            ></i>
+
+                            Anterior
+
+                        </button>
+
+
+                    {% endif %}
+
+
+                    <!-- PAGINA -->
+
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-light border"
+                        disabled
+                    >
+
+                        {{ pagina }}
+
+                    </button>
+
+
+                    <!-- SIGUIENTE -->
+
+                    {% if hay_siguiente %}
+
+
+                        <a
+                            href="{{ url_for(
+                                'cotizaciones_vendedor.lista',
+
+                                pagina=pagina + 1,
+
+                                buscar=buscar,
+
+                                estado=estado,
+
+                                origen=origen
+                            ) }}"
+
+                            class="btn btn-sm btn-outline-primary"
+                        >
+
+                            Siguiente
+
+                            <i
+                                class="bi bi-chevron-right ms-1"
+                            ></i>
+
+                        </a>
+
+
+                    {% else %}
+
+
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-primary"
+                            disabled
+                        >
+
+                            Siguiente
+
+                            <i
+                                class="bi bi-chevron-right ms-1"
+                            ></i>
+
+                        </button>
+
+
+                    {% endif %}
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    {% endif %}
+
+
+</div>
+
+
+{% endblock %}

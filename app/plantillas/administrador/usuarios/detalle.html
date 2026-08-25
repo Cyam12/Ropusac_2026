@@ -1,0 +1,273 @@
+{% extends "administrador/base.html" %}
+
+
+{% block titulo %}
+Detalle Usuario
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<div
+    class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"
+>
+
+
+    <div>
+
+        <h1 class="h3 mb-1">
+            Detalle del usuario
+        </h1>
+
+    </div>
+
+
+    <div class="d-flex gap-2">
+
+
+        <a
+            href="{{ url_for(
+                'usuarios.lista'
+            ) }}"
+            class="btn btn-outline-secondary"
+        >
+
+            Volver
+
+        </a>
+
+
+        <a
+            href="{{ url_for(
+                'usuarios.editar',
+                id_usuario=usuario.id_usuario
+            ) }}"
+            class="btn btn-primary"
+        >
+
+            <i class="bi bi-pencil me-1"></i>
+
+            Editar
+
+        </a>
+
+
+    </div>
+
+
+</div>
+
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body p-4">
+
+
+        <div class="row g-4">
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Nombre completo
+                </small>
+
+                <div class="fw-semibold">
+
+                    {{ usuario.nombre_completo }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <small class="text-muted">
+                    Documento
+                </small>
+
+                <div>
+
+                    {% if usuario.numero_documento %}
+
+                        DNI
+                        {{ usuario.numero_documento }}
+
+                    {% else %}
+
+                        Sin documento
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <small class="text-muted">
+                    Estado
+                </small>
+
+                <div>
+
+                    {% if usuario.activo %}
+
+                        <span class="badge text-bg-success">
+                            Activo
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge text-bg-secondary">
+                            Inactivo
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Correo electrónico
+                </small>
+
+                <div>
+
+                    {{ usuario.correo }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Celular
+                </small>
+
+                <div>
+
+                    {{ usuario.celular or "No registrado" }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Rol
+                </small>
+
+                <div>
+
+                    {{ usuario.rol.nombre }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Dirección
+                </small>
+
+                <div>
+
+                    {{ usuario.direccion or "No registrada" }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Origen de datos
+                </small>
+
+                <div>
+
+                    {% if usuario.datos_obtenidos_api %}
+
+                        <span class="badge text-bg-info">
+                            APIS.NET
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge text-bg-light">
+                            Registro manual
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Fecha de registro
+                </small>
+
+                <div>
+
+                    {{ usuario.creado_en.strftime(
+                        "%d/%m/%Y %H:%M"
+                    ) }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Último acceso
+                </small>
+
+                <div>
+
+                    {% if usuario.ultimo_acceso_en %}
+
+                        {{ usuario.ultimo_acceso_en.strftime(
+                            "%d/%m/%Y %H:%M"
+                        ) }}
+
+                    {% else %}
+
+                        Sin accesos registrados
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+{% endblock %}

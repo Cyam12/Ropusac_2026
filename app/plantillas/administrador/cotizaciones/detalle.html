@@ -1,0 +1,395 @@
+{% extends "administrador/base.html" %}
+
+
+{% block titulo %}
+Detalle Cotización
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<div
+    class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"
+>
+
+    <div>
+
+        <h1 class="h3 mb-1">
+            {{ cotizacion.numero_cotizacion }}
+        </h1>
+
+        <p class="text-muted mb-0">
+            Detalle de cotización
+        </p>
+
+    </div>
+
+
+    <div class="d-flex gap-2 flex-wrap">
+
+        <a
+            href="{{ url_for(
+                'cotizaciones_admin.lista'
+            ) }}"
+            class="btn btn-outline-secondary"
+        >
+            Volver
+        </a>
+
+
+        {% if cotizacion.pdf_url %}
+
+            <a
+                href="{{ cotizacion.pdf_url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-outline-primary"
+            >
+
+                <i class="bi bi-file-earmark-pdf me-1"></i>
+
+                Visualizar PDF
+
+            </a>
+
+
+            <a
+                href="{{ url_for(
+                    'cotizaciones_admin.descargar',
+                    id_cotizacion=cotizacion.id_cotizacion
+                ) }}"
+                class="btn btn-success"
+            >
+
+                <i class="bi bi-download me-1"></i>
+
+                Descargar PDF
+
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body p-4">
+
+        <div class="row g-4">
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Estado
+                </small>
+
+                <div class="fw-semibold">
+                    {{ estado.replace("_", " ") }}
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Fecha de emisión
+                </small>
+
+                <div>
+                    {{
+                        cotizacion.fecha_emision.strftime(
+                            "%d/%m/%Y"
+                        )
+                    }}
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Vigencia
+                </small>
+
+                <div>
+                    {{
+                        cotizacion.fecha_vigencia.strftime(
+                            "%d/%m/%Y"
+                        )
+                    }}
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Cliente
+                </small>
+
+                <div class="fw-semibold">
+                    {{ nombre_cliente }}
+                </div>
+
+                {% if cliente.numero_documento %}
+
+                    <small class="text-muted">
+                        {{ cliente.tipo_documento.value }}
+                        {{ cliente.numero_documento }}
+                    </small>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Vendedor
+                </small>
+
+                <div class="fw-semibold">
+                    {{ nombre_vendedor }}
+                </div>
+
+                <small class="text-muted">
+                    {{ vendedor.correo }}
+                </small>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Moneda
+                </small>
+
+                <div>
+                    {{ moneda }}
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Tipo de cambio
+                </small>
+
+                <div>
+
+                    1 USD =
+                    {{
+                        "%.6f"|format(
+                            cotizacion.tipo_cambio_soles_por_dolar
+                        )
+                    }}
+                    PEN
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Total equivalente
+                </small>
+
+                <div>
+
+                    {% if moneda == "PEN" %}
+                        US$
+                    {% else %}
+                        S/
+                    {% endif %}
+
+                    {{
+                        "%.2f"|format(
+                            cotizacion.total_equivalente
+                        )
+                    }}
+
+                </div>
+
+            </div>
+
+
+            {% if cotizacion.observaciones %}
+
+                <div class="col-12">
+
+                    <small class="text-muted">
+                        Observaciones
+                    </small>
+
+                    <div>
+                        {{ cotizacion.observaciones }}
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-header bg-white">
+
+        <strong>
+            Productos
+        </strong>
+
+    </div>
+
+
+    <div class="table-responsive">
+
+        <table class="table mb-0 align-middle">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Código
+                    </th>
+
+                    <th>
+                        Producto
+                    </th>
+
+                    <th class="text-end">
+                        Cantidad
+                    </th>
+
+                    <th class="text-end">
+                        Precio unitario
+                    </th>
+
+                    <th class="text-end">
+                        Subtotal
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+                {% for detalle in detalles %}
+
+                    <tr>
+
+                        <td>
+                            {{ detalle.codigo_producto }}
+                        </td>
+
+                        <td>
+                            {{ detalle.nombre_producto }}
+                        </td>
+
+                        <td class="text-end">
+                            {{ detalle.cantidad }}
+                        </td>
+
+                        <td class="text-end">
+
+                            {% if moneda == "PEN" %}
+                                S/
+                            {% else %}
+                                US$
+                            {% endif %}
+
+                            {{
+                                "%.2f"|format(
+                                    detalle.precio_unitario
+                                )
+                            }}
+
+                        </td>
+
+                        <td class="text-end">
+
+                            {% if moneda == "PEN" %}
+                                S/
+                            {% else %}
+                                US$
+                            {% endif %}
+
+                            {{
+                                "%.2f"|format(
+                                    detalle.subtotal
+                                )
+                            }}
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+
+            </tbody>
+
+
+            <tfoot>
+
+                <tr>
+
+                    <td
+                        colspan="4"
+                        class="text-end fw-semibold"
+                    >
+                        TOTAL
+                    </td>
+
+                    <td class="text-end fw-bold">
+
+                        {% if moneda == "PEN" %}
+                            S/
+                        {% else %}
+                            US$
+                        {% endif %}
+
+                        {{
+                            "%.2f"|format(
+                                cotizacion.total
+                            )
+                        }}
+
+                    </td>
+
+                </tr>
+
+            </tfoot>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+{% endblock %}

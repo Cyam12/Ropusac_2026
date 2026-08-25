@@ -1,0 +1,715 @@
+{% extends "area_comercial/base.html" %}
+
+
+{% block titulo %}
+Precios de Venta
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<div class="mb-4">
+
+    <h1 class="h3 mb-1">
+        Precios de Venta
+    </h1>
+
+    <p class="text-muted mb-0">
+
+        Establezca y actualice el precio final
+        de venta y el stock disponible
+        de cada producto.
+
+    </p>
+
+</div>
+
+
+<!-- =====================================================
+     FILTROS
+====================================================== -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body">
+
+        <form
+            method="GET"
+            class="row g-2"
+        >
+
+
+            <!-- BUSCAR -->
+
+            <div class="col-lg-5">
+
+                <input
+                    type="text"
+                    class="form-control"
+                    name="buscar"
+                    value="{{ buscar }}"
+                    placeholder="Buscar producto, código, marca o proveedor"
+                >
+
+            </div>
+
+
+            <!-- PROVEEDOR -->
+
+            <div class="col-lg-3">
+
+                <select
+                    class="form-select"
+                    name="id_proveedor"
+                >
+
+                    <option value="">
+                        Todos los proveedores
+                    </option>
+
+
+                    {% for proveedor in proveedores %}
+
+                        <option
+                            value="{{ proveedor.id_proveedor }}"
+
+                            {% if
+                                id_proveedor
+                                == proveedor.id_proveedor
+                            %}
+                                selected
+                            {% endif %}
+                        >
+
+                            {{ proveedor.razon_social }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- ESTADO PRECIO -->
+
+            <div class="col-lg-2">
+
+                <select
+                    class="form-select"
+                    name="estado_precio"
+                >
+
+                    <option value="">
+                        Todos
+                    </option>
+
+
+                    <option
+                        value="CON_PRECIO"
+
+                        {% if
+                            estado_precio
+                            == "CON_PRECIO"
+                        %}
+                            selected
+                        {% endif %}
+                    >
+                        Con precio
+                    </option>
+
+
+                    <option
+                        value="SIN_PRECIO"
+
+                        {% if
+                            estado_precio
+                            == "SIN_PRECIO"
+                        %}
+                            selected
+                        {% endif %}
+                    >
+                        Sin precio
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="col-auto">
+
+                <button
+                    type="submit"
+                    class="btn btn-outline-primary"
+                >
+
+                    <i class="bi bi-search"></i>
+
+                    Buscar
+
+                </button>
+
+            </div>
+
+
+            <div class="col-auto">
+
+                <a
+                    href="{{ url_for(
+                        'precios_venta_comercial.lista'
+                    ) }}"
+                    class="btn btn-outline-secondary"
+                >
+
+                    Limpiar
+
+                </a>
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     PRODUCTOS
+====================================================== -->
+
+<div class="row g-4">
+
+
+    {% for item in productos %}
+
+
+        {% set producto =
+            item.producto
+        %}
+
+
+        <div class="col-12">
+
+
+            <div class="card border-0 shadow-sm">
+
+
+                <div class="card-body">
+
+
+                    <div
+                        class="row align-items-center g-4"
+                    >
+
+
+                        <!-- =================================================
+                             IMAGEN
+                        ================================================== -->
+
+                        <div class="col-md-auto">
+
+
+                            {% if item.imagen %}
+
+
+                                <img
+                                    src="{{ item.imagen.url_imagen }}"
+                                    alt="{{ producto.nombre }}"
+                                    class="rounded border bg-white"
+
+                                    style="
+                                        width: 105px;
+                                        height: 105px;
+                                        object-fit: contain;
+                                    "
+                                >
+
+
+                            {% else %}
+
+
+                                <div
+                                    class="rounded border bg-light d-flex align-items-center justify-content-center"
+
+                                    style="
+                                        width: 105px;
+                                        height: 105px;
+                                    "
+                                >
+
+                                    <i
+                                        class="bi bi-image fs-2 text-muted"
+                                    ></i>
+
+                                </div>
+
+
+                            {% endif %}
+
+
+                        </div>
+
+
+                        <!-- =================================================
+                             PRODUCTO
+                        ================================================== -->
+
+                        <div class="col-md">
+
+
+                            <div
+                                class="small text-muted mb-1"
+                            >
+
+                                Código:
+                                {{ producto.codigo_producto }}
+
+                            </div>
+
+
+                            <h5 class="mb-2">
+
+                                {{ producto.nombre }}
+
+                            </h5>
+
+
+                            <div
+                                class="small text-muted mb-1"
+                            >
+
+                                <i
+                                    class="bi bi-truck me-1"
+                                ></i>
+
+                                {{ item.proveedor.razon_social }}
+
+                            </div>
+
+
+                            {% if producto.marca %}
+
+                                <div
+                                    class="small text-muted"
+                                >
+
+                                    Marca:
+                                    {{ producto.marca }}
+
+                                    {% if producto.modelo %}
+
+                                        · Modelo:
+                                        {{ producto.modelo }}
+
+                                    {% endif %}
+
+                                </div>
+
+                            {% endif %}
+
+
+                            <div class="mt-2">
+
+
+                                {% if
+                                    producto.stock_disponible
+                                    is not none
+                                    and producto.stock_disponible > 0
+                                %}
+
+                                    <span
+                                        class="badge text-bg-success"
+                                    >
+
+                                        Stock:
+                                        {{ producto.stock_disponible|int }}
+
+                                        {{ producto.unidad_medida }}
+
+                                    </span>
+
+                                {% else %}
+
+                                    <span
+                                        class="badge text-bg-warning"
+                                    >
+
+                                        Sin stock
+
+                                    </span>
+
+                                {% endif %}
+
+
+                            </div>
+
+
+                        </div>
+
+
+                        <!-- =================================================
+                             PRECIO BASE
+                        ================================================== -->
+
+                        <div class="col-md-2">
+
+
+                            <div
+                                class="small text-muted mb-1"
+                            >
+
+                                Precio base
+
+                            </div>
+
+
+                            <div
+                                class="fw-semibold fs-5"
+                            >
+
+
+                                {% if
+                                    producto.moneda_precio.value
+                                    == "PEN"
+                                %}
+
+                                    S/
+
+                                {% else %}
+
+                                    US$
+
+                                {% endif %}
+
+
+                                {{
+                                    "%.2f"|format(
+                                        producto.precio_base_actual
+                                    )
+                                }}
+
+
+                            </div>
+
+
+                            <div class="small text-muted">
+
+                                {{ producto.moneda_precio.value }}
+
+                            </div>
+
+
+                        </div>
+
+
+                        <!-- =================================================
+                             FORMULARIO
+                        ================================================== -->
+
+                        <div class="col-lg-5">
+
+
+                            <form
+                                method="POST"
+
+                                action="{{ url_for(
+                                    'precios_venta_comercial.actualizar',
+                                    id_producto=producto.id_producto
+                                ) }}"
+                            >
+
+
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    value="{{ csrf_token() }}"
+                                >
+
+
+                                <div class="row g-2">
+
+
+                                    <!-- =====================================
+                                         PRECIO FINAL
+                                    ====================================== -->
+
+                                    <div class="col-md-5">
+
+
+                                        <label
+                                            class="form-label small fw-semibold"
+                                        >
+
+                                            Precio final de venta
+
+                                        </label>
+
+
+                                        <div class="input-group">
+
+
+                                            <span
+                                                class="input-group-text"
+                                            >
+
+
+                                                {% if
+                                                    producto.moneda_precio.value
+                                                    == "PEN"
+                                                %}
+
+                                                    S/
+
+                                                {% else %}
+
+                                                    US$
+
+                                                {% endif %}
+
+
+                                            </span>
+
+
+                                            <input
+                                                type="number"
+
+                                                class="form-control"
+
+                                                name="precio_venta_actual"
+
+                                                min="0"
+
+                                                step="0.10"
+
+                                                value="{{
+                                                    '%.2f'|format(
+                                                        producto.precio_venta_actual
+                                                    )
+                                                    if producto.precio_venta_actual
+                                                    is not none
+                                                    else ''
+                                                }}"
+
+                                                onblur="
+                                                    if(this.value) {
+                                                        this.value =
+                                                            parseFloat(
+                                                                this.value
+                                                            ).toFixed(2);
+                                                    }
+                                                "
+
+                                                required
+                                            >
+
+
+                                        </div>
+
+
+                                        {% if
+                                            producto.precio_venta_actual
+                                            is not none
+                                        %}
+
+                                            <div
+                                                class="form-text"
+                                            >
+
+                                                Precio actual:
+
+                                                {% if
+                                                    producto.moneda_precio.value
+                                                    == "PEN"
+                                                %}
+                                                    S/
+                                                {% else %}
+                                                    US$
+                                                {% endif %}
+
+                                                {{
+                                                    "%.2f"|format(
+                                                        producto.precio_venta_actual
+                                                    )
+                                                }}
+
+                                            </div>
+
+                                        {% else %}
+
+                                            <div
+                                                class="form-text"
+                                            >
+
+                                                Precio pendiente.
+
+                                            </div>
+
+                                        {% endif %}
+
+
+                                    </div>
+
+
+                                    <!-- =====================================
+                                         STOCK
+                                    ====================================== -->
+
+                                    <div class="col-md-4">
+
+
+                                        <label
+                                            class="form-label small fw-semibold"
+                                        >
+
+                                            Stock disponible
+
+                                        </label>
+
+
+                                        <div class="input-group">
+
+
+                                            <input
+                                                type="number"
+
+                                                class="form-control"
+
+                                                name="stock_disponible"
+
+                                                min="0"
+
+                                                step="1"
+
+                                                value="{{
+                                                    producto.stock_disponible|int
+                                                    if producto.stock_disponible
+                                                    is not none
+                                                    else '0'
+                                                }}"
+
+                                                required
+                                            >
+
+
+                                            <span
+                                                class="input-group-text"
+                                            >
+
+                                                {{
+                                                    producto.unidad_medida
+                                                }}
+
+                                            </span>
+
+
+                                        </div>
+
+
+                                        <div class="form-text">
+
+                                            Cantidad disponible.
+
+                                        </div>
+
+
+                                    </div>
+
+
+                                    <!-- =====================================
+                                         GUARDAR
+                                    ====================================== -->
+
+                                    <div
+                                        class="col-md-3 d-flex align-items-center"
+                                    >
+
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-primary w-100 mt-md-3"
+                                        >
+
+                                            <i
+                                                class="bi bi-save me-1"
+                                            ></i>
+
+                                            Guardar
+
+                                        </button>
+
+
+                                    </div>
+
+
+                                </div>
+
+
+                            </form>
+
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    {% else %}
+
+
+        <div class="col-12">
+
+
+            <div
+                class="card border-0 shadow-sm"
+            >
+
+
+                <div
+                    class="card-body text-center py-5"
+                >
+
+
+                    <i
+                        class="bi bi-tags fs-1 text-muted"
+                    ></i>
+
+
+                    <div
+                        class="text-muted mt-2"
+                    >
+
+                        No se encontraron productos.
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    {% endfor %}
+
+
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,906 @@
+{% extends "vendedor/base.html" %}
+
+
+{% block titulo %}
+Productos
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<!-- =====================================================
+     CABECERA
+====================================================== -->
+
+<div class="mb-4">
+
+    <h1 class="h3 mb-1">
+        Productos
+    </h1>
+
+    <p class="text-muted mb-0">
+
+        Consulte los productos disponibles
+        y sus precios finales de venta.
+
+    </p>
+
+</div>
+
+
+<!-- =====================================================
+     FILTROS
+====================================================== -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body">
+
+        <form
+            method="GET"
+            class="row g-2"
+        >
+
+
+            <!-- =================================================
+                 BUSCADOR
+            ================================================== -->
+
+            <div class="col-lg-4">
+
+                <div class="input-group">
+
+                    <span
+                        class="input-group-text bg-white"
+                    >
+
+                        <i class="bi bi-search"></i>
+
+                    </span>
+
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="buscar"
+                        value="{{ buscar }}"
+                        placeholder="Buscar producto, código, marca o proveedor"
+                        autocomplete="off"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 CATEGORIA
+            ================================================== -->
+
+            <div class="col-lg-3">
+
+                <select
+                    class="form-select"
+                    name="categoria"
+                >
+
+                    <option value="">
+
+                        Todas las categorías
+
+                    </option>
+
+
+                    {% for item in categorias %}
+
+                        <option
+                            value="{{ item }}"
+
+                            {% if
+                                categoria == item
+                            %}
+                                selected
+                            {% endif %}
+                        >
+
+                            {{ item }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- =================================================
+                 PROVEEDOR
+            ================================================== -->
+
+            <div class="col-lg-2">
+
+                <select
+                    class="form-select"
+                    name="id_proveedor"
+                >
+
+                    <option value="">
+
+                        Todos los proveedores
+
+                    </option>
+
+
+                    {% for proveedor in proveedores %}
+
+                        <option
+                            value="{{ proveedor.id_proveedor }}"
+
+                            {% if
+                                id_proveedor
+                                == proveedor.id_proveedor
+                            %}
+                                selected
+                            {% endif %}
+                        >
+
+                            {{ proveedor.razon_social }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- =================================================
+                 STOCK
+            ================================================== -->
+
+            <div class="col-lg-2">
+
+                <select
+                    class="form-select"
+                    name="disponibilidad"
+                >
+
+                    <option value="">
+
+                        Todo el catálogo
+
+                    </option>
+
+
+                    <option
+                        value="CON_STOCK"
+
+                        {% if
+                            disponibilidad
+                            == "CON_STOCK"
+                        %}
+                            selected
+                        {% endif %}
+                    >
+
+                        Con stock
+
+                    </option>
+
+
+                    <option
+                        value="SIN_STOCK"
+
+                        {% if
+                            disponibilidad
+                            == "SIN_STOCK"
+                        %}
+                            selected
+                        {% endif %}
+                    >
+
+                        Sin stock
+
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- =================================================
+                 BUSCAR
+            ================================================== -->
+
+            <div class="col-auto">
+
+                <button
+                    type="submit"
+                    class="btn btn-outline-primary"
+                >
+
+                    <i class="bi bi-search me-1"></i>
+
+                    Buscar
+
+                </button>
+
+            </div>
+
+
+            <!-- =================================================
+                 LIMPIAR
+            ================================================== -->
+
+            <div class="col-auto">
+
+                <a
+                    href="{{ url_for(
+                        'productos_vendedor.lista'
+                    ) }}"
+                    class="btn btn-outline-secondary"
+                >
+
+                    Limpiar
+
+                </a>
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     CATALOGO
+====================================================== -->
+
+<div class="row g-4">
+
+
+    {% for item in productos %}
+
+
+        {% set producto =
+            item.producto
+        %}
+
+
+        <div
+            class="col-md-6 col-xl-4"
+        >
+
+
+            <div
+                class="card border-0 shadow-sm h-100"
+            >
+
+
+                <!-- =================================================
+                     IMAGEN
+                ================================================== -->
+
+                <div
+                    class="
+                        bg-white
+                        border-bottom
+                        d-flex
+                        align-items-center
+                        justify-content-center
+                        p-3
+                    "
+
+                    style="
+                        height: 230px;
+                    "
+                >
+
+
+                    {% if item.imagen_url %}
+
+
+                        <img
+                            src="{{ item.imagen_url }}"
+
+                            alt="{{ producto.nombre }}"
+
+                            loading="lazy"
+
+                            decoding="async"
+
+                            style="
+                                max-width: 100%;
+                                max-height: 200px;
+                                object-fit: contain;
+                            "
+                        >
+
+
+                    {% else %}
+
+
+                        <div
+                            class="text-center text-muted"
+                        >
+
+                            <i
+                                class="bi bi-image fs-1"
+                            ></i>
+
+                            <div class="small mt-2">
+
+                                Imagen no disponible
+
+                            </div>
+
+                        </div>
+
+
+                    {% endif %}
+
+
+                </div>
+
+
+                <!-- =================================================
+                     INFORMACION
+                ================================================== -->
+
+                <div
+                    class="card-body d-flex flex-column"
+                >
+
+
+                    <!-- CODIGO -->
+
+                    <div
+                        class="small text-muted mb-1"
+                    >
+
+                        {{
+                            producto.codigo_producto
+                            or "Sin código"
+                        }}
+
+                    </div>
+
+
+                    <!-- NOMBRE -->
+
+                    <h5
+                        class="card-title mb-2"
+                    >
+
+                        {{ producto.nombre }}
+
+                    </h5>
+
+
+                    <!-- =================================================
+                         CATEGORIA
+                    ================================================== -->
+
+                    {% if producto.categoria %}
+
+
+                        <div class="mb-2">
+
+                            <span
+                                class="badge text-bg-light border"
+                            >
+
+                                {{ producto.categoria }}
+
+                            </span>
+
+                        </div>
+
+
+                    {% endif %}
+
+
+                    <!-- =================================================
+                         MARCA / MODELO
+                    ================================================== -->
+
+                    {% if
+                        producto.marca
+                        or producto.modelo
+                    %}
+
+
+                        <div
+                            class="small text-muted mb-2"
+                        >
+
+
+                            {% if producto.marca %}
+
+                                Marca:
+                                {{ producto.marca }}
+
+                            {% endif %}
+
+
+                            {% if
+                                producto.marca
+                                and producto.modelo
+                            %}
+
+                                ·
+
+                            {% endif %}
+
+
+                            {% if producto.modelo %}
+
+                                Modelo:
+                                {{ producto.modelo }}
+
+                            {% endif %}
+
+
+                        </div>
+
+
+                    {% endif %}
+
+
+                    <!-- =================================================
+                         PROVEEDOR
+                    ================================================== -->
+
+                    <div
+                        class="small text-muted mb-3"
+                    >
+
+                        <i
+                            class="bi bi-truck me-1"
+                        ></i>
+
+                        {{
+                            item.proveedor.razon_social
+                        }}
+
+                    </div>
+
+
+                    <!-- =================================================
+                         PRECIO FINAL
+                    ================================================== -->
+
+                    <div class="mt-auto">
+
+
+                        <div class="small text-muted">
+
+                            Precio final
+
+                        </div>
+
+
+                        <div
+                            class="fs-3 fw-bold mb-2"
+                        >
+
+
+                            {% if
+                                producto.moneda_precio
+                                == "PEN"
+                            %}
+
+                                S/
+
+                            {% else %}
+
+                                US$
+
+                            {% endif %}
+
+
+                            {{
+                                "%.2f"|format(
+                                    producto.precio_venta_actual
+                                )
+                            }}
+
+
+                        </div>
+
+
+                        <!-- =================================================
+                             STOCK
+                        ================================================== -->
+
+                        {% if
+                            producto.stock_disponible
+                            is not none
+                            and producto.stock_disponible > 0
+                        %}
+
+
+                            <div class="mb-3">
+
+                                <span
+                                    class="badge text-bg-success"
+                                >
+
+                                    <i
+                                        class="bi bi-check-circle me-1"
+                                    ></i>
+
+                                    Stock:
+
+                                    {{
+                                        producto.stock_disponible
+                                        | int
+                                    }}
+
+                                    {{
+                                        producto.unidad_medida
+                                        or ""
+                                    }}
+
+                                </span>
+
+                            </div>
+
+
+                        {% else %}
+
+
+                            <div class="mb-3">
+
+                                <span
+                                    class="badge text-bg-warning"
+                                >
+
+                                    <i
+                                        class="bi bi-exclamation-circle me-1"
+                                    ></i>
+
+                                    Sin stock disponible
+
+                                </span>
+
+                            </div>
+
+
+                        {% endif %}
+
+
+                        <!-- =================================================
+                             DETALLE
+                        ================================================== -->
+
+                        <a
+                            href="{{ url_for(
+                                'productos_vendedor.detalle',
+                                id_producto=producto.id_producto
+                            ) }}"
+
+                            class="btn btn-outline-primary w-100"
+                        >
+
+                            <i
+                                class="bi bi-eye me-1"
+                            ></i>
+
+                            Ver producto
+
+                        </a>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    {% else %}
+
+
+        <!-- =================================================
+             SIN PRODUCTOS
+        ================================================== -->
+
+        <div class="col-12">
+
+
+            <div
+                class="card border-0 shadow-sm"
+            >
+
+
+                <div
+                    class="card-body py-5 text-center"
+                >
+
+
+                    <i
+                        class="bi bi-box-seam fs-1 text-muted"
+                    ></i>
+
+
+                    <h5 class="mt-3">
+
+                        No se encontraron productos
+
+                    </h5>
+
+
+                    <p class="text-muted mb-3">
+
+                        No existen productos que coincidan
+                        con los filtros seleccionados.
+
+                    </p>
+
+
+                    {% if
+                        buscar
+                        or categoria
+                        or id_proveedor
+                        or disponibilidad
+                    %}
+
+
+                        <a
+                            href="{{ url_for(
+                                'productos_vendedor.lista'
+                            ) }}"
+                            class="btn btn-sm btn-outline-secondary"
+                        >
+
+                            Mostrar todo el catálogo
+
+                        </a>
+
+
+                    {% endif %}
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    {% endfor %}
+
+
+</div>
+
+
+<!-- =====================================================
+     PAGINACION
+====================================================== -->
+
+{% if
+    hay_anterior
+    or hay_siguiente
+%}
+
+
+    <div
+        class="card border-0 shadow-sm mt-4"
+    >
+
+
+        <div class="card-body py-3">
+
+
+            <div
+                class="
+                    d-flex
+                    flex-wrap
+                    justify-content-between
+                    align-items-center
+                    gap-3
+                "
+            >
+
+
+                <!-- =================================================
+                     INFORMACION
+                ================================================== -->
+
+                <div
+                    class="small text-muted"
+                >
+
+
+                    Página
+
+                    <strong>
+
+                        {{ pagina }}
+
+                    </strong>
+
+
+                    <span class="mx-1">
+
+                        ·
+
+                    </span>
+
+
+                    Máximo
+
+                    <strong>
+
+                        {{ por_pagina }}
+
+                    </strong>
+
+                    productos por página
+
+
+                </div>
+
+
+                <!-- =================================================
+                     NAVEGACION
+                ================================================== -->
+
+                <div class="btn-group">
+
+
+                    <!-- ANTERIOR -->
+
+                    {% if hay_anterior %}
+
+
+                        <a
+                            href="{{ url_for(
+                                'productos_vendedor.lista',
+
+                                pagina=pagina - 1,
+
+                                buscar=buscar,
+
+                                categoria=categoria,
+
+                                id_proveedor=(
+                                    id_proveedor
+                                    or ''
+                                ),
+
+                                disponibilidad=disponibilidad
+                            ) }}"
+
+                            class="btn btn-sm btn-outline-secondary"
+                        >
+
+                            <i
+                                class="bi bi-chevron-left me-1"
+                            ></i>
+
+                            Anterior
+
+                        </a>
+
+
+                    {% else %}
+
+
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            disabled
+                        >
+
+                            <i
+                                class="bi bi-chevron-left me-1"
+                            ></i>
+
+                            Anterior
+
+                        </button>
+
+
+                    {% endif %}
+
+
+                    <!-- PAGINA ACTUAL -->
+
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-light border"
+                        disabled
+                    >
+
+                        {{ pagina }}
+
+                    </button>
+
+
+                    <!-- SIGUIENTE -->
+
+                    {% if hay_siguiente %}
+
+
+                        <a
+                            href="{{ url_for(
+                                'productos_vendedor.lista',
+
+                                pagina=pagina + 1,
+
+                                buscar=buscar,
+
+                                categoria=categoria,
+
+                                id_proveedor=(
+                                    id_proveedor
+                                    or ''
+                                ),
+
+                                disponibilidad=disponibilidad
+                            ) }}"
+
+                            class="btn btn-sm btn-outline-primary"
+                        >
+
+                            Siguiente
+
+                            <i
+                                class="bi bi-chevron-right ms-1"
+                            ></i>
+
+                        </a>
+
+
+                    {% else %}
+
+
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-primary"
+                            disabled
+                        >
+
+                            Siguiente
+
+                            <i
+                                class="bi bi-chevron-right ms-1"
+                            ></i>
+
+                        </button>
+
+
+                    {% endif %}
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+{% endif %}
+
+
+{% endblock %}

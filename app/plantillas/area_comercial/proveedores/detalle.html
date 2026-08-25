@@ -1,0 +1,332 @@
+{% extends "area_comercial/base.html" %}
+
+
+{% block titulo %}
+Detalle Proveedor
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<div
+    class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"
+>
+
+    <div>
+
+        <h1 class="h3 mb-1">
+
+            Detalle del proveedor
+
+        </h1>
+
+
+        <p class="text-muted mb-0">
+
+            {{ proveedor.razon_social }}
+
+        </p>
+
+    </div>
+
+
+    <div class="d-flex gap-2">
+
+
+        <a
+            href="{{ url_for(
+                'proveedores_comercial.lista'
+            ) }}"
+            class="btn btn-outline-secondary"
+        >
+
+            Volver
+
+        </a>
+
+
+        <a
+            href="{{ url_for(
+                'proveedores_comercial.editar',
+                id_proveedor=proveedor.id_proveedor
+            ) }}"
+            class="btn btn-primary"
+        >
+
+            <i class="bi bi-pencil me-1"></i>
+
+            Editar
+
+        </a>
+
+
+    </div>
+
+
+</div>
+
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body p-4">
+
+
+        <div class="row g-4">
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Razón social
+                </small>
+
+                <div class="fw-semibold">
+
+                    {{ proveedor.razon_social }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <small class="text-muted">
+                    Nombre comercial
+                </small>
+
+                <div>
+
+                    {{
+                        proveedor.nombre_comercial
+                        or "No registrado"
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Tipo de documento
+                </small>
+
+                <div>
+
+                    {% if proveedor.numero_documento %}
+
+                        RUC
+
+                    {% else %}
+
+                        Sin documento
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Número de documento
+                </small>
+
+                <div>
+
+                    {{
+                        proveedor.numero_documento
+                        or "No registrado"
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Estado
+                </small>
+
+                <div>
+
+                    {% if proveedor.activo %}
+
+                        <span class="badge text-bg-success">
+                            Activo
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge text-bg-secondary">
+                            Baja
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-12">
+
+                <small class="text-muted">
+                    Dirección fiscal
+                </small>
+
+                <div>
+
+                    {{
+                        proveedor.direccion_fiscal
+                        or "No registrada"
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Correo electrónico
+                </small>
+
+                <div>
+
+                    {{
+                        proveedor.correo
+                        or "No registrado"
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Celular
+                </small>
+
+                <div>
+
+                    {{
+                        proveedor.celular
+                        or "No registrado"
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Teléfono
+                </small>
+
+                <div>
+
+                    {{
+                        proveedor.telefono
+                        or "No registrado"
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Origen de datos
+                </small>
+
+                <div>
+
+                    {% if proveedor.datos_obtenidos_api %}
+
+                        <span class="badge text-bg-info">
+                            APIS.NET
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge text-bg-light">
+                            Registro manual
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Registrado
+                </small>
+
+                <div>
+
+                    {{
+                        proveedor.creado_en.strftime(
+                            "%d/%m/%Y %H:%M"
+                        )
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+                    Última consulta API
+                </small>
+
+                <div>
+
+                    {% if proveedor.api_consultada_en %}
+
+                        {{
+                            proveedor.api_consultada_en.strftime(
+                                "%d/%m/%Y %H:%M"
+                            )
+                        }}
+
+                    {% else %}
+
+                        No registrada
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+{% endblock %}

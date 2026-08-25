@@ -1,0 +1,2003 @@
+{% extends "vendedor/base.html" %}
+
+
+{% block titulo %}
+Nueva Cotización
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<div
+    class="d-flex justify-content-between align-items-center mb-4"
+>
+
+    <div>
+
+        <h1 class="h3 mb-1">
+            Nueva cotización
+        </h1>
+
+        <p class="text-muted mb-0">
+
+            Seleccione cliente, productos,
+            cantidades, moneda y vigencia.
+
+        </p>
+
+    </div>
+
+
+    <a
+        href="{{ url_for(
+            'cotizaciones_vendedor.lista'
+        ) }}"
+        class="btn btn-outline-secondary"
+    >
+        Volver
+    </a>
+
+</div>
+
+
+<form
+    method="POST"
+    id="formCotizacion"
+>
+
+
+    <input
+        type="hidden"
+        name="csrf_token"
+        value="{{ csrf_token() }}"
+    >
+
+
+    <input
+        type="hidden"
+        name="id_cliente"
+        id="idCliente"
+    >
+
+
+    <input
+        type="hidden"
+        name="id_tipo_cambio"
+        id="idTipoCambio"
+        value="{{ id_tipo_cambio }}"
+    >
+
+
+    <input
+        type="hidden"
+        name="productos_json"
+        id="productosJson"
+    >
+
+
+    <!-- =================================================
+         CLIENTE
+    ================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white">
+
+            <strong>
+                1. Cliente
+            </strong>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <label class="form-label">
+
+                Buscar cliente registrado
+
+            </label>
+
+
+            <input
+                type="text"
+                class="form-control"
+                id="buscarCliente"
+
+                placeholder="Nombre, razón social, DNI, RUC o correo"
+
+                autocomplete="off"
+            >
+
+
+            <div class="form-text">
+
+                Al hacer clic aparecerán los últimos
+                3 clientes registrados.
+
+            </div>
+
+
+            <div
+                id="resultadosCliente"
+                class="list-group mt-2"
+            ></div>
+
+
+            <div
+                id="clienteSeleccionado"
+                class="alert alert-success mt-3 mb-0"
+                style="display:none;"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         CONDICIONES
+    ================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white">
+
+            <strong>
+                2. Condiciones
+            </strong>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Moneda
+                    </label>
+
+
+                    <select
+                        class="form-select"
+                        name="moneda"
+                        id="moneda"
+                        required
+                    >
+
+                        <option value="PEN">
+
+                            Soles (PEN)
+
+                        </option>
+
+                        <option value="USD">
+
+                            Dólares (USD)
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+
+                        Tipo de cambio utilizado
+
+                    </label>
+
+
+                    <input
+                        type="text"
+                        class="form-control"
+
+                        value="1 USD = {{ soles_por_dolar }} PEN"
+
+                        disabled
+                    >
+
+
+                    <div class="form-text">
+
+                        ExchangeRate-API
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+
+                        Fecha de vigencia
+
+                    </label>
+
+
+                    <input
+                        type="date"
+                        class="form-control"
+
+                        name="fecha_vigencia"
+
+                        min="{{ fecha_minima }}"
+
+                        required
+                    >
+
+                </div>
+
+
+                <div class="col-12">
+
+                    <label class="form-label">
+
+                        Observaciones
+
+                    </label>
+
+
+                    <textarea
+                        class="form-control"
+                        name="observaciones"
+                        rows="3"
+                        maxlength="2000"
+                        placeholder="Condiciones adicionales..."
+                    ></textarea>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         PRODUCTOS
+    ================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white">
+
+            <strong>
+                3. Productos
+            </strong>
+
+        </div>
+
+
+        <div class="card-body">
+
+
+            <label class="form-label">
+
+                Buscar producto
+
+            </label>
+
+
+            <input
+                type="text"
+                class="form-control"
+                id="buscarProducto"
+
+                placeholder="Código, producto, marca o modelo"
+
+                autocomplete="off"
+            >
+
+
+            <div class="form-text">
+
+                Al hacer clic aparecerán los últimos
+                3 productos con precio y stock disponible.
+
+            </div>
+
+
+            <div
+                id="resultadosProducto"
+                class="list-group mt-2"
+            ></div>
+
+
+            <hr class="my-4">
+
+
+            <div class="table-responsive">
+
+                <table
+                    class="table align-middle"
+                >
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Producto
+                            </th>
+
+                            <th>
+                                Stock
+                            </th>
+
+                            <th style="width:130px;">
+                                Cantidad
+                            </th>
+
+                            <th class="text-end">
+                                Precio final
+                            </th>
+
+                            <th class="text-end">
+                                Importe
+                            </th>
+
+                            <th style="width:60px;">
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody
+                        id="productosSeleccionados"
+                    >
+
+                        <tr>
+
+                            <td
+                                colspan="6"
+                                class="text-center text-muted py-4"
+                            >
+
+                                Agregue productos
+                                a la cotización.
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         TOTALES
+    ================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body">
+
+
+            <div
+                class="d-flex justify-content-end"
+            >
+
+
+                <div
+                    style="min-width:360px;"
+                >
+
+
+                    <div
+                        class="d-flex justify-content-between mb-2"
+                    >
+
+                        <span>
+                            Subtotal
+                        </span>
+
+                        <span
+                            id="subtotalCotizacion"
+                        >
+                            S/ 0.00
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="d-flex justify-content-between mb-2"
+                    >
+
+                        <span>
+                            IGV incluido (18%)
+                        </span>
+
+                        <span
+                            id="igvCotizacion"
+                        >
+                            S/ 0.00
+                        </span>
+
+                    </div>
+
+
+                    <hr>
+
+
+                    <div
+                        class="d-flex justify-content-between mb-3"
+                    >
+
+                        <strong>
+                            Total
+                        </strong>
+
+                        <strong
+                            class="fs-4"
+                            id="totalCotizacion"
+                        >
+                            S/ 0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div
+                        class="d-flex justify-content-between text-muted"
+                    >
+
+                        <span
+                            id="tituloEquivalente"
+                        >
+
+                            Equivalente total en dólares
+
+                        </span>
+
+
+                        <span
+                            id="totalEquivalente"
+                        >
+
+                            US$ 0.00
+
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="d-flex justify-content-end gap-2"
+    >
+
+
+        <a
+            href="{{ url_for(
+                'cotizaciones_vendedor.lista'
+            ) }}"
+            class="btn btn-outline-secondary"
+        >
+
+            Cancelar
+
+        </a>
+
+
+        <button
+            type="submit"
+            class="btn btn-primary"
+        >
+
+            <i
+                class="bi bi-file-earmark-check me-1"
+            ></i>
+
+            Generar cotización
+
+        </button>
+
+
+    </div>
+
+
+</form>
+
+
+{% endblock %}
+
+
+{% block scripts %}
+
+
+<script>
+
+    // =====================================================
+    // CONFIGURACION
+    // =====================================================
+
+    const tipoCambio =
+        parseFloat(
+            "{{ soles_por_dolar }}"
+        );
+
+
+    const FACTOR_IGV =
+        1.18;
+
+
+    // =====================================================
+    // DATOS PRECARGADOS POR FLASK
+    //
+    // NO NECESITAN FETCH PARA MOSTRARSE AL HACER CLICK
+    // =====================================================
+
+    const clientesRecientes =
+        {{ clientes_recientes | tojson }};
+
+
+    const productosRecientes =
+        {{ productos_recientes | tojson }};
+
+
+    // =====================================================
+    // ELEMENTOS
+    // =====================================================
+
+    const idTipoCambio =
+        document.getElementById(
+            "idTipoCambio"
+        );
+
+
+    const moneda =
+        document.getElementById(
+            "moneda"
+        );
+
+
+    const idCliente =
+        document.getElementById(
+            "idCliente"
+        );
+
+
+    const buscarCliente =
+        document.getElementById(
+            "buscarCliente"
+        );
+
+
+    const resultadosCliente =
+        document.getElementById(
+            "resultadosCliente"
+        );
+
+
+    const clienteSeleccionado =
+        document.getElementById(
+            "clienteSeleccionado"
+        );
+
+
+    const buscarProducto =
+        document.getElementById(
+            "buscarProducto"
+        );
+
+
+    const resultadosProducto =
+        document.getElementById(
+            "resultadosProducto"
+        );
+
+
+    const tablaProductos =
+        document.getElementById(
+            "productosSeleccionados"
+        );
+
+
+    const productosJson =
+        document.getElementById(
+            "productosJson"
+        );
+
+
+    const subtotalCotizacion =
+        document.getElementById(
+            "subtotalCotizacion"
+        );
+
+
+    const igvCotizacion =
+        document.getElementById(
+            "igvCotizacion"
+        );
+
+
+    const totalCotizacion =
+        document.getElementById(
+            "totalCotizacion"
+        );
+
+
+    const totalEquivalente =
+        document.getElementById(
+            "totalEquivalente"
+        );
+
+
+    const tituloEquivalente =
+        document.getElementById(
+            "tituloEquivalente"
+        );
+
+
+    const formCotizacion =
+        document.getElementById(
+            "formCotizacion"
+        );
+
+
+    // =====================================================
+    // ESTADO
+    // =====================================================
+
+    let productos =
+        [];
+
+
+    let temporizadorCliente =
+        null;
+
+
+    let temporizadorProducto =
+        null;
+
+
+    let controladorCliente =
+        null;
+
+
+    let controladorProducto =
+        null;
+
+
+    // =====================================================
+    // ESCAPAR HTML
+    // =====================================================
+
+    function escaparHtml(
+        valor
+    ) {
+
+        return String(
+            valor ?? ""
+        )
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+    }
+
+
+    // =====================================================
+    // CLIENTES
+    // =====================================================
+
+    function renderizarClientes(
+        clientes
+    ) {
+
+        resultadosCliente.innerHTML =
+            "";
+
+
+        if (
+            clientes.length === 0
+        ) {
+
+            resultadosCliente.innerHTML =
+                `
+                    <div
+                        class="list-group-item text-muted"
+                    >
+                        No se encontraron clientes.
+                    </div>
+                `;
+
+            return;
+
+        }
+
+
+        for (
+            const cliente
+            of clientes
+        ) {
+
+            const boton =
+                document.createElement(
+                    "button"
+                );
+
+
+            boton.type =
+                "button";
+
+
+            boton.className =
+                "list-group-item list-group-item-action";
+
+
+            boton.innerHTML =
+                `
+                    <strong>
+                        ${escaparHtml(
+                            cliente.nombre
+                        )}
+                    </strong>
+
+                    <div
+                        class="small text-muted"
+                    >
+
+                        ${escaparHtml(
+                            cliente.tipo_documento
+                        )}
+
+                        ${escaparHtml(
+                            cliente.documento
+                        )}
+
+                        ${
+                            cliente.correo
+                            ?
+                            " · "
+                            +
+                            escaparHtml(
+                                cliente.correo
+                            )
+                            :
+                            ""
+                        }
+
+                    </div>
+                `;
+
+
+            boton.addEventListener(
+                "click",
+                function () {
+
+                    idCliente.value =
+                        cliente.id;
+
+
+                    buscarCliente.value =
+                        cliente.nombre;
+
+
+                    clienteSeleccionado.style.display =
+                        "";
+
+
+                    clienteSeleccionado.innerHTML =
+                        `
+                            <strong>
+                                Cliente seleccionado:
+                            </strong>
+
+                            ${escaparHtml(
+                                cliente.nombre
+                            )}
+
+                            <br>
+
+                            <span class="small">
+
+                                ${escaparHtml(
+                                    cliente.tipo_documento
+                                )}
+
+                                ${escaparHtml(
+                                    cliente.documento
+                                )}
+
+                                ${
+                                    cliente.correo
+                                    ?
+                                    " · "
+                                    +
+                                    escaparHtml(
+                                        cliente.correo
+                                    )
+                                    :
+                                    ""
+                                }
+
+                            </span>
+                        `;
+
+
+                    resultadosCliente.innerHTML =
+                        "";
+
+                }
+            );
+
+
+            resultadosCliente.appendChild(
+                boton
+            );
+
+        }
+
+    }
+
+
+    // =====================================================
+    // BUSCAR CLIENTES EN SERVIDOR
+    // =====================================================
+
+    async function consultarClientes(
+        consulta
+    ) {
+
+        if (
+            controladorCliente
+        ) {
+
+            controladorCliente.abort();
+
+        }
+
+
+        controladorCliente =
+            new AbortController();
+
+
+        try {
+
+            const respuesta =
+                await fetch(
+                    (
+                        `/vendedor/cotizaciones/clientes/buscar`
+                        +
+                        `?q=${encodeURIComponent(
+                            consulta
+                        )}`
+                    ),
+
+                    {
+                        signal:
+                            controladorCliente.signal
+                    }
+                );
+
+
+            const datos =
+                await respuesta.json();
+
+
+            if (
+                !respuesta.ok
+                ||
+                !datos.exito
+            ) {
+
+                return [];
+
+            }
+
+
+            return (
+                datos.resultados
+                ||
+                []
+            );
+
+        }
+
+        catch (
+            error
+        ) {
+
+            if (
+                error.name
+                !== "AbortError"
+            ) {
+
+                console.error(
+                    error
+                );
+
+            }
+
+            return [];
+
+        }
+
+    }
+
+
+    // =====================================================
+    // CLICK CLIENTE
+    //
+    // INMEDIATO
+    // =====================================================
+
+    buscarCliente.addEventListener(
+        "focus",
+        function () {
+
+            if (
+                !idCliente.value
+            ) {
+
+                renderizarClientes(
+                    clientesRecientes
+                );
+
+            }
+
+        }
+    );
+
+
+    // =====================================================
+    // ESCRIBIR CLIENTE
+    // =====================================================
+
+    buscarCliente.addEventListener(
+        "input",
+        function () {
+
+            clearTimeout(
+                temporizadorCliente
+            );
+
+
+            idCliente.value =
+                "";
+
+
+            clienteSeleccionado.style.display =
+                "none";
+
+
+            const q =
+                buscarCliente.value.trim();
+
+
+            if (
+                q === ""
+            ) {
+
+                renderizarClientes(
+                    clientesRecientes
+                );
+
+                return;
+
+            }
+
+
+            temporizadorCliente =
+                setTimeout(
+                    async function () {
+
+                        const resultados =
+                            await consultarClientes(
+                                q
+                            );
+
+
+                        renderizarClientes(
+                            resultados
+                        );
+
+                    },
+                    180
+                );
+
+        }
+    );
+
+
+    // =====================================================
+    // PRODUCTOS
+    // =====================================================
+
+    function renderizarResultadosProductos(
+        resultados
+    ) {
+
+        resultadosProducto.innerHTML =
+            "";
+
+
+        if (
+            resultados.length === 0
+        ) {
+
+            resultadosProducto.innerHTML =
+                `
+                    <div
+                        class="list-group-item text-muted"
+                    >
+                        No se encontraron productos.
+                    </div>
+                `;
+
+            return;
+
+        }
+
+
+        for (
+            const producto
+            of resultados
+        ) {
+
+            const boton =
+                document.createElement(
+                    "button"
+                );
+
+
+            boton.type =
+                "button";
+
+
+            boton.className =
+                "list-group-item list-group-item-action";
+
+
+            boton.innerHTML =
+                `
+                    <strong>
+
+                        ${escaparHtml(
+                            producto.nombre
+                        )}
+
+                    </strong>
+
+
+                    <div
+                        class="small text-muted"
+                    >
+
+                        ${escaparHtml(
+                            producto.codigo
+                        )}
+
+                        · Stock:
+
+                        ${escaparHtml(
+                            producto.stock
+                        )}
+
+                        ${escaparHtml(
+                            producto.unidad
+                        )}
+
+                        ${
+                            producto.marca
+                            ?
+                            " · "
+                            +
+                            escaparHtml(
+                                producto.marca
+                            )
+                            :
+                            ""
+                        }
+
+                    </div>
+                `;
+
+
+            boton.addEventListener(
+                "click",
+                function () {
+
+                    agregarProducto(
+                        producto
+                    );
+
+
+                    resultadosProducto.innerHTML =
+                        "";
+
+
+                    buscarProducto.value =
+                        "";
+
+                }
+            );
+
+
+            resultadosProducto.appendChild(
+                boton
+            );
+
+        }
+
+    }
+
+
+    // =====================================================
+    // CONSULTAR PRODUCTOS
+    // =====================================================
+
+    async function consultarProductos(
+        consulta
+    ) {
+
+        if (
+            controladorProducto
+        ) {
+
+            controladorProducto.abort();
+
+        }
+
+
+        controladorProducto =
+            new AbortController();
+
+
+        try {
+
+            const url =
+                (
+                    `/vendedor/cotizaciones/productos/buscar`
+                    +
+                    `?q=${encodeURIComponent(
+                        consulta
+                    )}`
+                    +
+                    `&id_tipo_cambio=${idTipoCambio.value}`
+                );
+
+
+            const respuesta =
+                await fetch(
+                    url,
+
+                    {
+                        signal:
+                            controladorProducto.signal
+                    }
+                );
+
+
+            const datos =
+                await respuesta.json();
+
+
+            if (
+                !respuesta.ok
+                ||
+                !datos.exito
+            ) {
+
+                return [];
+
+            }
+
+
+            return (
+                datos.resultados
+                ||
+                []
+            );
+
+        }
+
+        catch (
+            error
+        ) {
+
+            if (
+                error.name
+                !== "AbortError"
+            ) {
+
+                console.error(
+                    error
+                );
+
+            }
+
+            return [];
+
+        }
+
+    }
+
+
+    // =====================================================
+    // CLICK PRODUCTO
+    //
+    // INMEDIATO
+    // =====================================================
+
+    buscarProducto.addEventListener(
+        "focus",
+        function () {
+
+            renderizarResultadosProductos(
+                productosRecientes
+            );
+
+        }
+    );
+
+
+    // =====================================================
+    // ESCRIBIR PRODUCTO
+    // =====================================================
+
+    buscarProducto.addEventListener(
+        "input",
+        function () {
+
+            clearTimeout(
+                temporizadorProducto
+            );
+
+
+            const q =
+                buscarProducto.value.trim();
+
+
+            if (
+                q === ""
+            ) {
+
+                renderizarResultadosProductos(
+                    productosRecientes
+                );
+
+                return;
+
+            }
+
+
+            temporizadorProducto =
+                setTimeout(
+                    async function () {
+
+                        const resultados =
+                            await consultarProductos(
+                                q
+                            );
+
+
+                        renderizarResultadosProductos(
+                            resultados
+                        );
+
+                    },
+                    180
+                );
+
+        }
+    );
+
+
+    // =====================================================
+    // AGREGAR PRODUCTO
+    // =====================================================
+
+    function agregarProducto(
+        producto
+    ) {
+
+        const existente =
+            productos.find(
+                item =>
+                    item.id_producto
+                    === producto.id
+            );
+
+
+        if (
+            existente
+        ) {
+
+            alert(
+                "El producto ya fue agregado."
+            );
+
+            return;
+
+        }
+
+
+        productos.push({
+            id_producto:
+                producto.id,
+
+            codigo:
+                producto.codigo,
+
+            nombre:
+                producto.nombre,
+
+            unidad:
+                producto.unidad,
+
+            stock:
+                parseFloat(
+                    producto.stock
+                ),
+
+            precio_pen:
+                parseFloat(
+                    producto.precio_pen
+                ),
+
+            cantidad:
+                1
+        });
+
+
+        renderizarProductos();
+
+    }
+
+
+    // =====================================================
+    // PRECIO SEGUN MONEDA
+    // =====================================================
+
+    function obtenerPrecio(
+        producto
+    ) {
+
+        if (
+            moneda.value
+            === "PEN"
+        ) {
+
+            return (
+                producto.precio_pen
+            );
+
+        }
+
+
+        return (
+            producto.precio_pen
+            /
+            tipoCambio
+        );
+
+    }
+
+
+    // =====================================================
+    // TABLA PRODUCTOS SELECCIONADOS
+    // =====================================================
+
+    function renderizarProductos() {
+
+        tablaProductos.innerHTML =
+            "";
+
+
+        if (
+            productos.length === 0
+        ) {
+
+            tablaProductos.innerHTML =
+                `
+                    <tr>
+
+                        <td
+                            colspan="6"
+
+                            class="text-center text-muted py-4"
+                        >
+
+                            Agregue productos
+                            a la cotización.
+
+                        </td>
+
+                    </tr>
+                `;
+
+
+            actualizarTotales();
+
+            return;
+
+        }
+
+
+        productos.forEach(
+            (
+                producto,
+                indice
+            ) => {
+
+                const precio =
+                    obtenerPrecio(
+                        producto
+                    );
+
+
+                const importe =
+                    precio
+                    *
+                    producto.cantidad;
+
+
+                const simbolo =
+                    (
+                        moneda.value
+                        === "PEN"
+                        ?
+                        "S/"
+                        :
+                        "US$"
+                    );
+
+
+                const fila =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                fila.innerHTML =
+                    `
+                        <td>
+
+                            <strong>
+
+                                ${escaparHtml(
+                                    producto.nombre
+                                )}
+
+                            </strong>
+
+
+                            <div
+                                class="small text-muted"
+                            >
+
+                                ${escaparHtml(
+                                    producto.codigo
+                                )}
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            ${producto.stock}
+
+                            ${escaparHtml(
+                                producto.unidad
+                            )}
+
+                        </td>
+
+
+                        <td>
+
+                            <input
+                                type="number"
+
+                                class="form-control form-control-sm"
+
+                                min="1"
+
+                                max="${producto.stock}"
+
+                                step="1"
+
+                                value="${producto.cantidad}"
+
+                                data-indice="${indice}"
+                            >
+
+                        </td>
+
+
+                        <td
+                            class="text-end"
+                        >
+
+                            ${simbolo}
+
+                            ${precio.toFixed(
+                                2
+                            )}
+
+                        </td>
+
+
+                        <td
+                            class="text-end fw-semibold"
+                        >
+
+                            ${simbolo}
+
+                            ${importe.toFixed(
+                                2
+                            )}
+
+                        </td>
+
+
+                        <td>
+
+                            <button
+                                type="button"
+
+                                class="btn btn-sm btn-outline-danger"
+
+                                data-eliminar="${indice}"
+                            >
+
+                                <i
+                                    class="bi bi-trash"
+                                ></i>
+
+                            </button>
+
+                        </td>
+                    `;
+
+
+                tablaProductos.appendChild(
+                    fila
+                );
+
+            }
+        );
+
+
+        // =================================================
+        // CAMBIAR CANTIDAD
+        // =================================================
+
+        tablaProductos
+            .querySelectorAll(
+                "input[data-indice]"
+            )
+            .forEach(
+                input => {
+
+                    input.addEventListener(
+                        "change",
+                        function () {
+
+                            const indice =
+                                parseInt(
+                                    input.dataset.indice
+                                );
+
+
+                            let cantidad =
+                                parseFloat(
+                                    input.value
+                                );
+
+
+                            if (
+                                Number.isNaN(
+                                    cantidad
+                                )
+                                ||
+                                cantidad <= 0
+                            ) {
+
+                                cantidad =
+                                    0.001;
+
+                            }
+
+
+                            if (
+                                cantidad
+                                >
+                                productos[
+                                    indice
+                                ].stock
+                            ) {
+
+                                cantidad =
+                                    productos[
+                                        indice
+                                    ].stock;
+
+                            }
+
+
+                            productos[
+                                indice
+                            ].cantidad =
+                                cantidad;
+
+
+                            input.value =
+                                cantidad;
+
+
+                            renderizarProductos();
+
+                        }
+                    );
+
+                }
+            );
+
+
+        // =================================================
+        // ELIMINAR
+        // =================================================
+
+        tablaProductos
+            .querySelectorAll(
+                "button[data-eliminar]"
+            )
+            .forEach(
+                boton => {
+
+                    boton.addEventListener(
+                        "click",
+                        function () {
+
+                            const indice =
+                                parseInt(
+                                    boton.dataset.eliminar
+                                );
+
+
+                            productos.splice(
+                                indice,
+                                1
+                            );
+
+
+                            renderizarProductos();
+
+                        }
+                    );
+
+                }
+            );
+
+
+        actualizarTotales();
+
+    }
+
+
+    // =====================================================
+    // TOTALES
+    //
+    // TOTAL YA INCLUYE IGV
+    //
+    // SUBTOTAL = TOTAL / 1.18
+    // IGV = TOTAL - SUBTOTAL
+    // =====================================================
+
+    function actualizarTotales() {
+
+        let total =
+            0;
+
+
+        for (
+            const producto
+            of productos
+        ) {
+
+            total += (
+                obtenerPrecio(
+                    producto
+                )
+                *
+                producto.cantidad
+            );
+
+        }
+
+
+        total =
+            Math.round(
+                (
+                    total
+                    +
+                    Number.EPSILON
+                )
+                *
+                100
+            )
+            /
+            100;
+
+
+        let subtotal =
+            total
+            /
+            FACTOR_IGV;
+
+
+        subtotal =
+            Math.round(
+                (
+                    subtotal
+                    +
+                    Number.EPSILON
+                )
+                *
+                100
+            )
+            /
+            100;
+
+
+        let igv =
+            total
+            -
+            subtotal;
+
+
+        igv =
+            Math.round(
+                (
+                    igv
+                    +
+                    Number.EPSILON
+                )
+                *
+                100
+            )
+            /
+            100;
+
+
+        if (
+            moneda.value
+            === "PEN"
+        ) {
+
+            subtotalCotizacion.textContent =
+                (
+                    "S/ "
+                    +
+                    subtotal.toFixed(
+                        2
+                    )
+                );
+
+
+            igvCotizacion.textContent =
+                (
+                    "S/ "
+                    +
+                    igv.toFixed(
+                        2
+                    )
+                );
+
+
+            totalCotizacion.textContent =
+                (
+                    "S/ "
+                    +
+                    total.toFixed(
+                        2
+                    )
+                );
+
+
+            tituloEquivalente.textContent =
+                (
+                    "Equivalente total en dólares"
+                );
+
+
+            totalEquivalente.textContent =
+                (
+                    "US$ "
+                    +
+                    (
+                        total
+                        /
+                        tipoCambio
+                    ).toFixed(
+                        2
+                    )
+                );
+
+        }
+
+        else {
+
+            subtotalCotizacion.textContent =
+                (
+                    "US$ "
+                    +
+                    subtotal.toFixed(
+                        2
+                    )
+                );
+
+
+            igvCotizacion.textContent =
+                (
+                    "US$ "
+                    +
+                    igv.toFixed(
+                        2
+                    )
+                );
+
+
+            totalCotizacion.textContent =
+                (
+                    "US$ "
+                    +
+                    total.toFixed(
+                        2
+                    )
+                );
+
+
+            tituloEquivalente.textContent =
+                (
+                    "Equivalente total en soles"
+                );
+
+
+            totalEquivalente.textContent =
+                (
+                    "S/ "
+                    +
+                    (
+                        total
+                        *
+                        tipoCambio
+                    ).toFixed(
+                        2
+                    )
+                );
+
+        }
+
+    }
+
+
+    // =====================================================
+    // MONEDA
+    // =====================================================
+
+    moneda.addEventListener(
+        "change",
+        function () {
+
+            renderizarProductos();
+
+        }
+    );
+
+
+    // =====================================================
+    // SUBMIT
+    // =====================================================
+
+    formCotizacion.addEventListener(
+        "submit",
+        function (
+            event
+        ) {
+
+            if (
+                !idCliente.value
+            ) {
+
+                event.preventDefault();
+
+                alert(
+                    "Seleccione un cliente."
+                );
+
+                return;
+
+            }
+
+
+            if (
+                productos.length === 0
+            ) {
+
+                event.preventDefault();
+
+                alert(
+                    "Agregue al menos un producto."
+                );
+
+                return;
+
+            }
+
+
+            productosJson.value =
+                JSON.stringify(
+                    productos.map(
+                        producto => ({
+                            id_producto:
+                                producto.id_producto,
+
+                            cantidad:
+                                producto.cantidad
+                        })
+                    )
+                );
+
+        }
+    );
+
+
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,455 @@
+{% extends "area_comercial/base.html" %}
+
+
+{% block titulo %}
+Detalle Producto
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<div
+    class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"
+>
+
+    <div>
+
+        <h1 class="h3 mb-1">
+            {{ producto.nombre }}
+        </h1>
+
+        <p class="text-muted mb-0">
+            {{ producto.codigo_producto }}
+        </p>
+
+    </div>
+
+
+    <div class="d-flex gap-2">
+
+        <a
+            href="{{ url_for(
+                'productos_comercial.lista'
+            ) }}"
+            class="btn btn-outline-secondary"
+        >
+            Volver
+        </a>
+
+        <a
+            href="{{ url_for(
+                'productos_comercial.editar',
+                id_producto=producto.id_producto
+            ) }}"
+            class="btn btn-primary"
+        >
+
+            <i class="bi bi-pencil me-1"></i>
+
+            Editar
+
+        </a>
+
+    </div>
+
+</div>
+
+
+<div class="row g-4">
+
+
+    <!-- IMAGEN -->
+
+    <div class="col-lg-4">
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body">
+
+                <h5 class="mb-3">
+                    Imagen
+                </h5>
+
+
+                {% if imagen %}
+
+                    <div class="text-center mb-3">
+
+                        <img
+                            src="{{ imagen.url_imagen }}"
+                            alt="{{ producto.nombre }}"
+                            class="img-fluid rounded border"
+
+                            style="
+                                max-height:320px;
+                                object-fit:contain;
+                            "
+                        >
+
+                    </div>
+
+
+                    <form
+                        method="POST"
+
+                        action="{{ url_for(
+                            'productos_comercial.eliminar_imagen',
+                            id_producto=producto.id_producto
+                        ) }}"
+                        class="mb-3"
+                    >
+
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="{{ csrf_token() }}"
+                        >
+
+                        <button
+                            type="submit"
+                            class="btn btn-outline-danger w-100"
+
+                            onclick="return confirm(
+                                '¿Desea eliminar la imagen actual?'
+                            );"
+                        >
+
+                            <i class="bi bi-trash me-1"></i>
+
+                            Eliminar imagen
+
+                        </button>
+
+                    </form>
+
+                {% else %}
+
+                    <div
+                        class="border rounded bg-light d-flex flex-column align-items-center justify-content-center mb-3"
+
+                        style="
+                            height:250px;
+                        "
+                    >
+
+                        <i
+                            class="bi bi-image fs-1 text-muted"
+                        ></i>
+
+                        <span class="text-muted">
+                            Producto sin imagen
+                        </span>
+
+                    </div>
+
+                {% endif %}
+
+
+                <hr>
+
+
+                <h6>
+
+                    {% if imagen %}
+                        Reemplazar imagen
+                    {% else %}
+                        Agregar imagen
+                    {% endif %}
+
+                </h6>
+
+
+                <form
+                    method="POST"
+                    enctype="multipart/form-data"
+
+                    action="{{ url_for(
+                        'productos_comercial.reemplazar_imagen',
+                        id_producto=producto.id_producto
+                    ) }}"
+                >
+
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="{{ csrf_token() }}"
+                    >
+
+                    <input
+                        type="file"
+                        class="form-control mb-2"
+                        name="imagen"
+
+                        accept=".jpg,.jpeg,.png,.webp,.gif,image/*"
+
+                        required
+                    >
+
+                    <button
+                        class="btn btn-outline-primary w-100"
+                        type="submit"
+                    >
+
+                        <i class="bi bi-cloud-upload me-1"></i>
+
+                        {% if imagen %}
+                            Reemplazar
+                        {% else %}
+                            Subir imagen
+                        {% endif %}
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- DATOS -->
+
+    <div class="col-lg-8">
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body p-4">
+
+                <div class="row g-4">
+
+
+                    <div class="col-md-6">
+
+                        <small class="text-muted">
+                            Producto
+                        </small>
+
+                        <div class="fw-semibold">
+                            {{ producto.nombre }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <small class="text-muted">
+                            Código
+                        </small>
+
+                        <div>
+                            {{ producto.codigo_producto }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <small class="text-muted">
+                            Proveedor
+                        </small>
+
+                        <div>
+                            {{ producto.proveedor.razon_social }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <small class="text-muted">
+                            Código proveedor
+                        </small>
+
+                        <div>
+                            {{
+                                producto.codigo_proveedor
+                                or "No registrado"
+                            }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-12">
+
+                        <small class="text-muted">
+                            Descripción
+                        </small>
+
+                        <div>
+                            {{
+                                producto.descripcion
+                                or "No registrada"
+                            }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <small class="text-muted">
+                            Categoría
+                        </small>
+
+                        <div>
+                            {{
+                                producto.categoria
+                                or "No registrada"
+                            }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <small class="text-muted">
+                            Marca
+                        </small>
+
+                        <div>
+                            {{
+                                producto.marca
+                                or "No registrada"
+                            }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <small class="text-muted">
+                            Modelo
+                        </small>
+
+                        <div>
+                            {{
+                                producto.modelo
+                                or "No registrado"
+                            }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <small class="text-muted">
+                            Unidad
+                        </small>
+
+                        <div>
+                            {{ producto.unidad_medida }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <small class="text-muted">
+                            Precio base
+                        </small>
+
+                        <div class="fw-semibold">
+
+                            {% if
+                                producto.moneda_precio.value
+                                == "PEN"
+                            %}
+                                S/
+                            {% else %}
+                                US$
+                            {% endif %}
+
+                            {{
+                                "%.2f"|format(
+                                    producto.precio_base_actual
+                                )
+                            }}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <small class="text-muted">
+                            Imagen
+                        </small>
+
+                        <div>
+
+                            {% if imagen %}
+
+                                <span class="badge text-bg-success">
+                                    Registrada
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge text-bg-warning">
+                                    Pendiente
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <small class="text-muted">
+                            Registrado por
+                        </small>
+
+                        <div>
+                            {{ registrado_por }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <small class="text-muted">
+                            Fecha de registro
+                        </small>
+
+                        <div>
+
+                            {{
+                                producto.creado_en.strftime(
+                                    "%d/%m/%Y %H:%M"
+                                )
+                            }}
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+{% endblock %}

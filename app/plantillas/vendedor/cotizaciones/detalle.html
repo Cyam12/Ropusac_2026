@@ -1,0 +1,680 @@
+{% extends "vendedor/base.html" %}
+
+
+{% block titulo %}
+Detalle Cotización
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<div
+    class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"
+>
+
+    <div>
+
+        <h1 class="h3 mb-1">
+
+            {{ cotizacion.numero_cotizacion }}
+
+        </h1>
+
+        <p class="text-muted mb-0">
+
+            Cotización comercial
+
+        </p>
+
+    </div>
+
+
+    <div class="d-flex flex-wrap gap-2">
+
+
+        <a
+            href="{{ url_for(
+                'cotizaciones_vendedor.lista'
+            ) }}"
+            class="btn btn-outline-secondary"
+        >
+
+            Volver
+
+        </a>
+
+
+        {% if cotizacion.pdf_url %}
+
+
+            <a
+                href="{{ cotizacion.pdf_url }}"
+
+                target="_blank"
+
+                rel="noopener noreferrer"
+
+                class="btn btn-outline-primary"
+            >
+
+                <i
+                    class="bi bi-file-earmark-pdf me-1"
+                ></i>
+
+                Visualizar PDF
+
+            </a>
+
+
+            <a
+                href="{{ cotizacion.pdf_url }}?descargar=1"
+
+                class="btn btn-outline-success"
+            >
+
+                <i
+                    class="bi bi-download me-1"
+                ></i>
+
+                Descargar PDF
+
+            </a>
+
+
+        {% endif %}
+
+
+        {% if cliente.correo %}
+
+
+            <form
+                method="POST"
+
+                action="{{ url_for(
+                    'cotizaciones_vendedor.enviar_cotizacion_correo',
+                    id_cotizacion=cotizacion.id_cotizacion
+                ) }}"
+            >
+
+
+                <input
+                    type="hidden"
+
+                    name="csrf_token"
+
+                    value="{{ csrf_token() }}"
+                >
+
+
+                <button
+                    type="submit"
+
+                    class="btn btn-primary"
+                >
+
+                    <i
+                        class="bi bi-envelope me-1"
+                    ></i>
+
+                    Enviar al cliente
+
+                </button>
+
+
+            </form>
+
+
+        {% endif %}
+
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ESTADO
+====================================================== -->
+
+<div
+    class="alert alert-light border shadow-sm"
+>
+
+    <div class="row g-3">
+
+
+        <div class="col-md-3">
+
+            <small class="text-muted">
+                Estado
+            </small>
+
+            <div class="fw-semibold">
+
+                {{ estado.replace("_", " ") }}
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-3">
+
+            <small class="text-muted">
+
+                Fecha emisión
+
+            </small>
+
+            <div>
+
+                {{
+                    cotizacion.fecha_emision.strftime(
+                        "%d/%m/%Y"
+                    )
+                }}
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-3">
+
+            <small class="text-muted">
+
+                Vigencia
+
+            </small>
+
+            <div>
+
+                {{
+                    cotizacion.fecha_vigencia.strftime(
+                        "%d/%m/%Y"
+                    )
+                }}
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-3">
+
+            <small class="text-muted">
+
+                Creada por
+
+            </small>
+
+            <div>
+
+                {{ nombre_vendedor }}
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     CLIENTE
+====================================================== -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-header bg-white">
+
+        <strong>
+            Cliente
+        </strong>
+
+    </div>
+
+
+    <div class="card-body">
+
+        <div class="row g-3">
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+
+                    Cliente
+
+                </small>
+
+                <div class="fw-semibold">
+
+                    {{ nombre_cliente }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+
+                    Documento
+
+                </small>
+
+                <div>
+
+                    {{ cliente.tipo_documento.value }}
+
+                    {{
+                        cliente.numero_documento
+                        or ""
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <small class="text-muted">
+
+                    Correo
+
+                </small>
+
+                <div>
+
+                    {{
+                        cliente.correo
+                        or "No registrado"
+                    }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-12">
+
+                <small class="text-muted">
+
+                    Dirección
+
+                </small>
+
+                <div>
+
+                    {{
+                        cliente.direccion
+                        or "No registrada"
+                    }}
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     PRODUCTOS
+====================================================== -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-header bg-white">
+
+        <strong>
+            Productos cotizados
+        </strong>
+
+    </div>
+
+
+    <div class="table-responsive">
+
+        <table
+            class="table mb-0 align-middle"
+        >
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Código
+                    </th>
+
+                    <th>
+                        Producto
+                    </th>
+
+                    <th class="text-end">
+                        Cantidad
+                    </th>
+
+                    <th class="text-end">
+                        Valor unitario
+                    </th>
+
+                    <th class="text-end">
+                        Subtotal
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+                {% for detalle in detalles %}
+
+
+                    <tr>
+
+                        <td>
+
+                            {{ detalle.codigo_producto }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ detalle.nombre_producto }}
+
+                        </td>
+
+
+                        <td class="text-end">
+
+                            {{ detalle.cantidad }}
+
+                        </td>
+
+
+                        <td class="text-end">
+
+                            {% if moneda == "PEN" %}
+                                S/
+                            {% else %}
+                                US$
+                            {% endif %}
+
+                            {{
+                                "%.2f"|format(
+                                    detalle.precio_unitario
+                                )
+                            }}
+
+                        </td>
+
+
+                        <td class="text-end">
+
+                            {% if moneda == "PEN" %}
+                                S/
+                            {% else %}
+                                US$
+                            {% endif %}
+
+                            {{
+                                "%.2f"|format(
+                                    detalle.subtotal
+                                )
+                            }}
+
+                        </td>
+
+                    </tr>
+
+
+                {% endfor %}
+
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     TOTALES
+====================================================== -->
+
+<div class="row justify-content-end">
+
+    <div class="col-lg-5">
+
+
+        <div
+            class="card border-0 shadow-sm"
+        >
+
+
+            <div class="card-body">
+
+
+                <!-- SUBTOTAL -->
+
+                <div
+                    class="d-flex justify-content-between mb-2"
+                >
+
+                    <span>
+                        Subtotal
+                    </span>
+
+                    <span>
+
+                        {% if moneda == "PEN" %}
+                            S/
+                        {% else %}
+                            US$
+                        {% endif %}
+
+                        {{
+                            "%.2f"|format(
+                                cotizacion.subtotal
+                            )
+                        }}
+
+                    </span>
+
+                </div>
+
+
+                <!-- IGV -->
+
+                <div
+                    class="d-flex justify-content-between mb-2"
+                >
+
+                    <span>
+                        IGV (18%)
+                    </span>
+
+                    <span>
+
+                        {% if moneda == "PEN" %}
+                            S/
+                        {% else %}
+                            US$
+                        {% endif %}
+
+                        {{
+                            "%.2f"|format(
+                                igv
+                            )
+                        }}
+
+                    </span>
+
+                </div>
+
+
+                <hr>
+
+
+                <!-- TOTAL -->
+
+                <div
+                    class="d-flex justify-content-between mb-3"
+                >
+
+                    <strong>
+                        TOTAL
+                    </strong>
+
+                    <strong
+                        class="fs-4"
+                    >
+
+                        {% if moneda == "PEN" %}
+                            S/
+                        {% else %}
+                            US$
+                        {% endif %}
+
+                        {{
+                            "%.2f"|format(
+                                cotizacion.total
+                            )
+                        }}
+
+                    </strong>
+
+                </div>
+
+
+                <!-- EQUIVALENTE -->
+
+                <div
+                    class="d-flex justify-content-between text-muted"
+                >
+
+                    <span>
+
+                        {% if moneda == "PEN" %}
+
+                            Equivalente total
+                            en dólares
+
+                        {% else %}
+
+                            Equivalente total
+                            en soles
+
+                        {% endif %}
+
+                    </span>
+
+
+                    <span>
+
+                        {% if moneda == "PEN" %}
+
+                            US$
+
+                        {% else %}
+
+                            S/
+
+                        {% endif %}
+
+                        {{
+                            "%.2f"|format(
+                                cotizacion.total_equivalente
+                            )
+                        }}
+
+                    </span>
+
+                </div>
+
+
+                <hr>
+
+
+                <div
+                    class="d-flex justify-content-between small"
+                >
+
+                    <span>
+                        Tipo de cambio
+                    </span>
+
+                    <span>
+
+                        1 USD =
+
+                        {{
+                            "%.6f"|format(
+                                cotizacion.tipo_cambio_soles_por_dolar
+                            )
+                        }}
+
+                        PEN
+
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     OBSERVACIONES
+====================================================== -->
+
+{% if cotizacion.observaciones %}
+
+    <div
+        class="card border-0 shadow-sm mt-4"
+    >
+
+        <div class="card-body">
+
+            <strong>
+                Observaciones
+            </strong>
+
+            <div class="mt-2">
+
+                {{ cotizacion.observaciones }}
+
+            </div>
+
+        </div>
+
+    </div>
+
+{% endif %}
+
+
+{% endblock %}

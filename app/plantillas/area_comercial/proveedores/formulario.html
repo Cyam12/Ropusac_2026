@@ -1,0 +1,890 @@
+{% extends "area_comercial/base.html" %}
+
+
+{% block titulo %}
+
+    {% if proveedor %}
+        Editar Proveedor
+    {% else %}
+        Nuevo Proveedor
+    {% endif %}
+
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<div class="mb-4">
+
+    <h1 class="h3 mb-1">
+
+        {% if proveedor %}
+
+            Editar proveedor
+
+        {% else %}
+
+            Registrar proveedor
+
+        {% endif %}
+
+    </h1>
+
+
+    <p class="text-muted mb-0">
+
+        Registre mediante RUC con APIS.NET
+        o utilice registro manual sin documento.
+
+    </p>
+
+</div>
+
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body p-4">
+
+
+        <form method="POST">
+
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="datos_obtenidos_api"
+                id="datosObtenidosApi"
+
+                value="{{
+                    request.form.get(
+                        'datos_obtenidos_api',
+                        '1'
+                        if proveedor
+                        and proveedor.datos_obtenidos_api
+                        else '0'
+                    )
+                }}"
+            >
+
+
+            <div class="row g-3">
+
+
+                <!-- =====================================
+                     TIPO DOCUMENTO
+                ====================================== -->
+
+                <div class="col-md-4">
+
+
+                    <label
+                        for="tipoDocumento"
+                        class="form-label"
+                    >
+
+                        Tipo de registro
+
+                    </label>
+
+
+                    {% set tipo_actual =
+                        request.form.get(
+                            'tipo_documento'
+                        )
+                        if request.method == 'POST'
+                        else (
+                            proveedor.tipo_documento.value
+                            if proveedor
+                            else 'RUC'
+                        )
+                    %}
+
+
+                    <select
+                        class="form-select"
+                        name="tipo_documento"
+                        id="tipoDocumento"
+                        required
+                    >
+
+
+                        <option
+                            value="RUC"
+
+                            {% if tipo_actual == 'RUC' %}
+                                selected
+                            {% endif %}
+                        >
+
+                            RUC
+
+                        </option>
+
+
+                        <option
+                            value="SIN_DOCUMENTO"
+
+                            {% if
+                                tipo_actual == 'SIN_DOCUMENTO'
+                            %}
+                                selected
+                            {% endif %}
+                        >
+
+                            Sin documento
+
+                        </option>
+
+
+                    </select>
+
+
+                </div>
+
+
+                <!-- =====================================
+                     RUC
+                ====================================== -->
+
+                <div
+                    class="col-md-8"
+                    id="contenedorRuc"
+                >
+
+
+                    <label
+                        for="numeroDocumento"
+                        class="form-label"
+                    >
+                        RUC
+                    </label>
+
+
+                    <div class="input-group">
+
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="numero_documento"
+                            id="numeroDocumento"
+
+                            maxlength="11"
+
+                            inputmode="numeric"
+
+                            value="{{
+                                request.form.get(
+                                    'numero_documento',
+                                    proveedor.numero_documento
+                                    if proveedor
+                                    and proveedor.numero_documento
+                                    else ''
+                                )
+                            }}"
+                        >
+
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary"
+                            id="botonConsultarRuc"
+                        >
+
+                            <i class="bi bi-search"></i>
+
+                            Consultar RUC
+
+                        </button>
+
+
+                    </div>
+
+
+                    <div
+                        id="informacionSunat"
+                        class="form-text"
+                    >
+
+                        Consulte APIS.NET para completar
+                        los datos de la empresa.
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- =====================================
+                     RAZON SOCIAL
+                ====================================== -->
+
+                <div class="col-md-6">
+
+
+                    <label
+                        for="razonSocial"
+                        class="form-label"
+                    >
+
+                        Razón social
+
+                    </label>
+
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="razon_social"
+                        id="razonSocial"
+
+                        maxlength="200"
+
+                        value="{{
+                            request.form.get(
+                                'razon_social',
+                                proveedor.razon_social
+                                if proveedor
+                                else ''
+                            )
+                        }}"
+
+                        required
+                    >
+
+
+                </div>
+
+
+                <!-- =====================================
+                     NOMBRE COMERCIAL
+                ====================================== -->
+
+                <div class="col-md-6">
+
+
+                    <label
+                        for="nombreComercial"
+                        class="form-label"
+                    >
+
+                        Nombre comercial
+
+                    </label>
+
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="nombre_comercial"
+                        id="nombreComercial"
+
+                        maxlength="200"
+
+                        value="{{
+                            request.form.get(
+                                'nombre_comercial',
+                                proveedor.nombre_comercial
+                                if proveedor
+                                and proveedor.nombre_comercial
+                                else ''
+                            )
+                        }}"
+                    >
+
+
+                </div>
+
+
+                <!-- =====================================
+                     DIRECCION
+                ====================================== -->
+
+                <div class="col-12">
+
+
+                    <label
+                        for="direccionFiscal"
+                        class="form-label"
+                    >
+
+                        Dirección fiscal
+
+                    </label>
+
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="direccion_fiscal"
+                        id="direccionFiscal"
+
+                        maxlength="300"
+
+                        value="{{
+                            request.form.get(
+                                'direccion_fiscal',
+                                proveedor.direccion_fiscal
+                                if proveedor
+                                and proveedor.direccion_fiscal
+                                else ''
+                            )
+                        }}"
+                    >
+
+
+                </div>
+
+
+                <!-- =====================================
+                     CORREO
+                ====================================== -->
+
+                <div class="col-md-6">
+
+
+                    <label class="form-label">
+
+                        Correo electrónico
+
+                    </label>
+
+
+                    <input
+                        type="email"
+                        class="form-control"
+                        name="correo"
+                        maxlength="180"
+
+                        value="{{
+                            request.form.get(
+                                'correo',
+                                proveedor.correo
+                                if proveedor
+                                and proveedor.correo
+                                else ''
+                            )
+                        }}"
+                    >
+
+
+                </div>
+
+
+                <!-- =====================================
+                     CELULAR
+                ====================================== -->
+
+                <div class="col-md-3">
+
+
+                    <label class="form-label">
+
+                        Celular
+
+                    </label>
+
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="celular"
+                        maxlength="30"
+
+                        value="{{
+                            request.form.get(
+                                'celular',
+                                proveedor.celular
+                                if proveedor
+                                and proveedor.celular
+                                else ''
+                            )
+                        }}"
+                    >
+
+
+                </div>
+
+
+                <!-- =====================================
+                     TELEFONO
+                ====================================== -->
+
+                <div class="col-md-3">
+
+
+                    <label class="form-label">
+
+                        Teléfono
+
+                    </label>
+
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="telefono"
+                        maxlength="30"
+
+                        value="{{
+                            request.form.get(
+                                'telefono',
+                                proveedor.telefono
+                                if proveedor
+                                and proveedor.telefono
+                                else ''
+                            )
+                        }}"
+                    >
+
+
+                </div>
+
+
+            </div>
+
+
+            <hr class="my-4">
+
+
+            <div
+                class="d-flex justify-content-end gap-2"
+            >
+
+
+                <a
+                    href="{{ url_for(
+                        'proveedores_comercial.lista'
+                    ) }}"
+                    class="btn btn-outline-secondary"
+                >
+
+                    Cancelar
+
+                </a>
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+
+                    <i class="bi bi-save me-1"></i>
+
+                    Guardar
+
+                </button>
+
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+</div>
+
+
+{% endblock %}
+
+
+{% block scripts %}
+
+
+<script>
+
+
+    // =====================================================
+    // ELEMENTOS
+    // =====================================================
+
+    const tipoDocumento =
+        document.getElementById(
+            "tipoDocumento"
+        );
+
+
+    const contenedorRuc =
+        document.getElementById(
+            "contenedorRuc"
+        );
+
+
+    const numeroDocumento =
+        document.getElementById(
+            "numeroDocumento"
+        );
+
+
+    const botonConsultarRuc =
+        document.getElementById(
+            "botonConsultarRuc"
+        );
+
+
+    const razonSocial =
+        document.getElementById(
+            "razonSocial"
+        );
+
+
+    const nombreComercial =
+        document.getElementById(
+            "nombreComercial"
+        );
+
+
+    const direccionFiscal =
+        document.getElementById(
+            "direccionFiscal"
+        );
+
+
+    const datosObtenidosApi =
+        document.getElementById(
+            "datosObtenidosApi"
+        );
+
+
+    const informacionSunat =
+        document.getElementById(
+            "informacionSunat"
+        );
+
+
+    // =====================================================
+    // CAMBIAR TIPO
+    // =====================================================
+
+    function actualizarTipoDocumento() {
+
+
+        if (
+            tipoDocumento.value
+            === "SIN_DOCUMENTO"
+        ) {
+
+
+            contenedorRuc.style.display =
+                "none";
+
+
+            numeroDocumento.value =
+                "";
+
+
+            datosObtenidosApi.value =
+                "0";
+
+
+            informacionSunat.textContent =
+                "";
+
+
+        } else {
+
+
+            contenedorRuc.style.display =
+                "";
+
+
+        }
+
+
+    }
+
+
+    tipoDocumento.addEventListener(
+        "change",
+        function () {
+
+
+            datosObtenidosApi.value =
+                "0";
+
+
+            actualizarTipoDocumento();
+
+
+        }
+    );
+
+
+    actualizarTipoDocumento();
+
+
+    // =====================================================
+    // SOLO NUMEROS RUC
+    // =====================================================
+
+    numeroDocumento.addEventListener(
+        "input",
+        function () {
+
+
+            numeroDocumento.value =
+                numeroDocumento.value
+                    .replace(
+                        /\D/g,
+                        ""
+                    )
+                    .slice(
+                        0,
+                        11
+                    );
+
+
+            datosObtenidosApi.value =
+                "0";
+
+
+        }
+    );
+
+
+    // =====================================================
+    // SI MODIFICA DATOS OBTENIDOS DE API
+    // =====================================================
+
+    razonSocial.addEventListener(
+        "input",
+        function () {
+
+            if (
+                tipoDocumento.value
+                === "RUC"
+            ) {
+
+                datosObtenidosApi.value =
+                    "0";
+
+            }
+
+        }
+    );
+
+
+    nombreComercial.addEventListener(
+        "input",
+        function () {
+
+            if (
+                tipoDocumento.value
+                === "RUC"
+            ) {
+
+                datosObtenidosApi.value =
+                    "0";
+
+            }
+
+        }
+    );
+
+
+    direccionFiscal.addEventListener(
+        "input",
+        function () {
+
+            if (
+                tipoDocumento.value
+                === "RUC"
+            ) {
+
+                datosObtenidosApi.value =
+                    "0";
+
+            }
+
+        }
+    );
+
+
+    // =====================================================
+    // CONSULTAR RUC
+    // =====================================================
+
+    botonConsultarRuc.addEventListener(
+        "click",
+        async function () {
+
+
+            const ruc =
+                numeroDocumento.value.trim();
+
+
+            if (
+                !/^\d{11}$/.test(
+                    ruc
+                )
+            ) {
+
+
+                alert(
+                    "Ingrese un RUC válido de 11 dígitos."
+                );
+
+
+                return;
+
+
+            }
+
+
+            const textoOriginal =
+                botonConsultarRuc.innerHTML;
+
+
+            botonConsultarRuc.disabled =
+                true;
+
+
+            botonConsultarRuc.innerHTML =
+                `
+                    <span
+                        class="spinner-border spinner-border-sm me-1"
+                    ></span>
+
+                    Consultando
+                `;
+
+
+            informacionSunat.textContent =
+                "Consultando información...";
+
+
+            try {
+
+
+                const respuesta =
+                    await fetch(
+                        `/integraciones/ruc/${ruc}?entidad=proveedores`
+                    );
+
+
+                const datos =
+                    await respuesta.json();
+
+
+                if (
+                    !respuesta.ok
+                    || !datos.exito
+                ) {
+
+
+                    throw new Error(
+                        datos.mensaje
+                        ||
+                        "No se pudo consultar el RUC."
+                    );
+
+
+                }
+
+
+                razonSocial.value =
+                    datos.razon_social
+                    || "";
+
+
+                nombreComercial.value =
+                    datos.nombre_comercial
+                    || "";
+
+
+                direccionFiscal.value =
+                    datos.direccion
+                    || "";
+
+
+                datosObtenidosApi.value =
+                    "1";
+
+
+                const informacion =
+                    [];
+
+
+                if (
+                    datos.estado
+                ) {
+
+                    informacion.push(
+                        `Estado: ${datos.estado}`
+                    );
+
+                }
+
+
+                if (
+                    datos.condicion
+                ) {
+
+                    informacion.push(
+                        `Condición: ${datos.condicion}`
+                    );
+
+                }
+
+
+                informacionSunat.textContent =
+                    informacion.length
+                    ? informacion.join(
+                        " | "
+                    )
+                    : "RUC consultado correctamente.";
+
+
+            }
+
+            catch (
+                error
+            ) {
+
+
+                datosObtenidosApi.value =
+                    "0";
+
+
+                informacionSunat.textContent =
+                    "No se pudo completar la consulta.";
+
+
+                alert(
+                    error.message
+                );
+
+
+            }
+
+            finally {
+
+
+                botonConsultarRuc.disabled =
+                    false;
+
+
+                botonConsultarRuc.innerHTML =
+                    textoOriginal;
+
+
+            }
+
+
+        }
+    );
+
+
+</script>
+
+
+{% endblock %}
