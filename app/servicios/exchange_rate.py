@@ -5,6 +5,8 @@ from decimal import (
 
 import requests
 
+from urllib.parse import urlsplit, urlunsplit
+
 from flask import current_app
 
 
@@ -47,7 +49,7 @@ def obtener_soles_por_dolar():
         "EXCHANGE_RATE_BASE_URL"
     )
 
-    if not api_key:
+    if not api_key or not str(api_key).strip():
 
         raise ErrorExchangeRate(
             (
@@ -56,7 +58,7 @@ def obtener_soles_por_dolar():
             )
         )
 
-    if not base_url:
+    if not base_url or not str(base_url).strip():
 
         raise ErrorExchangeRate(
             (
@@ -65,10 +67,75 @@ def obtener_soles_por_dolar():
             )
         )
 
-    url = (
-        f"{base_url.rstrip('/')}"
-        "/pair/USD/PEN"
-    )
+    api_key = str(api_key).strip()
+    base_url = str(base_url).strip().rstrip("/")
+
+    try:
+
+        partes_url = urlsplit(
+            base_url
+        )
+
+        if (
+            partes_url.scheme not in ("https", "http")
+            or not partes_url.netloc
+        ):
+
+            raise ValueError(
+                "La URL base no es válida."
+            )
+
+        segmentos = [
+            segmento
+            for segmento in partes_url.path.split("/")
+            if segmento
+        ]
+
+        # Acepta tanto la URL base /v6 como una URL que
+        # ya contenga la clave o el endpoint completo.
+        # La clave se envía exclusivamente por Bearer.
+        indice_version = next(
+            (
+                indice
+                for indice, segmento in enumerate(segmentos)
+                if segmento.lower() in ("v6", "v7")
+            ),
+            None
+        )
+
+        if indice_version is not None:
+
+            ruta_base = (
+                "/"
+                + "/".join(
+                    segmentos[:indice_version + 1]
+                )
+            )
+
+        else:
+
+            ruta_base = (
+                partes_url.path.rstrip("/")
+            )
+
+        url = urlunsplit(
+            (
+                partes_url.scheme,
+                partes_url.netloc,
+                ruta_base + "/pair/USD/PEN",
+                "",
+                ""
+            )
+        )
+
+    except ValueError as error:
+
+        raise ErrorExchangeRate(
+            (
+                "EXCHANGE_RATE_BASE_URL no tiene "
+                "un formato válido."
+            )
+        ) from error
 
     headers = {
         "Accept":
@@ -83,15 +150,21 @@ def obtener_soles_por_dolar():
         respuesta = requests.get(
             url,
             headers=headers,
-            timeout=15
+            timeout=(4, 8)
         )
 
     except requests.RequestException as error:
 
+        current_app.logger.warning(
+            "ExchangeRate-API: fallo de conexión (%s).",
+            type(error).__name__
+        )
+
         raise ErrorExchangeRate(
             (
-                "No fue posible conectar "
-                "con ExchangeRate-API."
+                "No fue posible conectar con "
+                "ExchangeRate-API. "
+                f"Detalle: {type(error).__name__}."
             )
         ) from error
 
@@ -113,6 +186,16 @@ def obtener_soles_por_dolar():
             codigo_http=codigo_http
         ) from error
 
+    if not isinstance(datos, dict):
+
+        raise ErrorExchangeRate(
+            (
+                "ExchangeRate-API devolvió "
+                "un formato de respuesta inesperado."
+            ),
+            codigo_http=codigo_http
+        )
+
     if not respuesta.ok:
 
         mensaje = (
@@ -121,6 +204,12 @@ def obtener_soles_por_dolar():
             )
             or
             "Error consultando ExchangeRate-API."
+        )
+
+        current_app.logger.warning(
+            "ExchangeRate-API respondió HTTP %s: %s.",
+            codigo_http,
+            mensaje
         )
 
         raise ErrorExchangeRate(
@@ -135,14 +224,21 @@ def obtener_soles_por_dolar():
         != "success"
     ):
 
+        mensaje = (
+            datos.get(
+                "error-type"
+            )
+            or
+            "ExchangeRate-API rechazó la consulta."
+        )
+
+        current_app.logger.warning(
+            "ExchangeRate-API rechazó la consulta: %s.",
+            mensaje
+        )
+
         raise ErrorExchangeRate(
-            (
-                datos.get(
-                    "error-type"
-                )
-                or
-                "ExchangeRate-API rechazó la consulta."
-            ),
+            mensaje,
             codigo_http=codigo_http
         )
 
@@ -172,7 +268,10 @@ def obtener_soles_por_dolar():
             codigo_http=codigo_http
         ) from error
 
-    if tasa <= 0:
+    if (
+        not tasa.is_finite()
+        or tasa <= 0
+    ):
 
         raise ErrorExchangeRate(
             (
