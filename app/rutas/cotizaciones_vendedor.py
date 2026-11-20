@@ -494,10 +494,15 @@ def registrar_api(
 
 
 # =========================================================
-# OBTENER TIPO DE CAMBIO
+# =========================================================
+# OBTENER ULTIMO TIPO DE CAMBIO GUARDADO
+#
+# Esta consulta nunca llama a servicios externos. Permite
+# renderizar la pantalla usando el último valor persistido
+# mientras el navegador actualiza la tasa en segundo plano.
 # =========================================================
 
-def obtener_tipo_cambio():
+def obtener_tipo_cambio_guardado():
 
     existente = (
         db.session.execute(
@@ -511,10 +516,11 @@ def obtener_tipo_cambio():
 
                 FROM tipos_cambio
 
-                WHERE fecha_tipo_cambio = CURRENT_DATE
-                  AND proveedor = 'ExchangeRate-API'
+                WHERE proveedor = 'ExchangeRate-API'
 
-                ORDER BY obtenido_en DESC
+                ORDER BY
+                    obtenido_en DESC,
+                    id_tipo_cambio DESC
 
                 LIMIT 1
                 """
@@ -524,142 +530,26 @@ def obtener_tipo_cambio():
         .first()
     )
 
-    if existente:
-
-        return {
-            "id_tipo_cambio":
-                existente[
-                    "id_tipo_cambio"
-                ],
-
-            "soles_por_dolar":
-                Decimal(
-                    existente[
-                        "soles_por_dolar"
-                    ]
-                )
-        }
-
-    try:
-
-        resultado = (
-            obtener_soles_por_dolar()
-        )
-
-    except ErrorExchangeRate as error:
-
-        try:
-
-            registrar_api(
-                servicio=(
-                    ServicioApiEnum.EXCHANGE_RATE
-                ),
-
-                operacion=(
-                    "CONSULTAR_USD_PEN"
-                ),
-
-                exitoso=False,
-
-                codigo_http=(
-                    error.codigo_http
-                ),
-
-                mensaje=str(
-                    error
-                )
-            )
-
-            db.session.commit()
-
-        except Exception:
-
-            db.session.rollback()
-
-        raise
-
-    id_tipo_cambio = (
-        db.session.execute(
-            text(
-                """
-                INSERT INTO tipos_cambio (
-                    soles_por_dolar,
-                    proveedor,
-                    fecha_tipo_cambio,
-                    identificador_consulta
-                )
-                VALUES (
-                    :soles_por_dolar,
-                    'ExchangeRate-API',
-                    CURRENT_DATE,
-                    :identificador
-                )
-                RETURNING id_tipo_cambio
-                """
-            ),
-
-            {
-                "soles_por_dolar":
-                    resultado[
-                        "soles_por_dolar"
-                    ],
-
-                "identificador":
-                    resultado[
-                        "identificador"
-                    ]
-            }
-        )
-        .scalar_one()
-    )
-
-    registrar_api(
-        servicio=(
-            ServicioApiEnum.EXCHANGE_RATE
-        ),
-
-        operacion=(
-            "CONSULTAR_USD_PEN"
-        ),
-
-        exitoso=True,
-
-        codigo_http=(
-            resultado[
-                "codigo_http"
-            ]
-        ),
-
-        identificador_externo=(
-            resultado[
-                "identificador"
-            ]
-        ),
-
-        respuesta={
-            "soles_por_dolar":
-                str(
-                    resultado[
-                        "soles_por_dolar"
-                    ]
-                )
-        }
-    )
-
-    db.session.commit()
+    if not existente:
+        return None
 
     return {
         "id_tipo_cambio":
-            id_tipo_cambio,
+            existente["id_tipo_cambio"],
 
         "soles_por_dolar":
-            resultado[
-                "soles_por_dolar"
-            ]
+            Decimal(
+                existente["soles_por_dolar"]
+            ),
+
+        "fecha_tipo_cambio":
+            existente["fecha_tipo_cambio"],
+
+        "identificador_consulta":
+            existente["identificador_consulta"]
     }
 
 
-# =========================================================
 # PRECIO PRODUCTO EN PEN
 # =========================================================
 
@@ -1536,6 +1426,199 @@ def buscar_productos():
 
 
 # =========================================================
+# =========================================================
+# ACTUALIZAR TIPO DE CAMBIO
+#
+# La consulta externa se ejecuta mediante AJAX para que
+# nunca retrase la apertura de la pantalla de cotización.
+# =========================================================
+
+@bp.post(
+    "/tipo-cambio/actualizar"
+)
+@rol_requerido(
+    "VENDEDOR"
+)
+def actualizar_tipo_cambio():
+
+    try:
+
+        resultado = (
+            obtener_soles_por_dolar()
+        )
+
+        # Si ExchangeRate-API devuelve el mismo identificador
+        # de actualización, reutilizamos el registro existente.
+        # Así evitamos duplicar filas en Neon.
+        existente = None
+
+        if resultado["identificador"]:
+
+            existente = (
+                db.session.execute(
+                    text(
+                        """
+                        SELECT
+                            id_tipo_cambio
+
+                        FROM tipos_cambio
+
+                        WHERE proveedor = 'ExchangeRate-API'
+                          AND identificador_consulta =
+                              :identificador
+
+                        ORDER BY obtenido_en DESC
+
+                        LIMIT 1
+                        """
+                    ),
+                    {
+                        "identificador":
+                            resultado["identificador"]
+                    }
+                )
+                .mappings()
+                .first()
+            )
+
+        if existente:
+
+            id_tipo_cambio = (
+                existente["id_tipo_cambio"]
+            )
+
+        else:
+
+            id_tipo_cambio = (
+                db.session.execute(
+                    text(
+                        """
+                        INSERT INTO tipos_cambio (
+                            soles_por_dolar,
+                            proveedor,
+                            fecha_tipo_cambio,
+                            identificador_consulta
+                        )
+                        VALUES (
+                            :soles_por_dolar,
+                            'ExchangeRate-API',
+                            CURRENT_DATE,
+                            :identificador
+                        )
+                        RETURNING id_tipo_cambio
+                        """
+                    ),
+                    {
+                        "soles_por_dolar":
+                            resultado["soles_por_dolar"],
+
+                        "identificador":
+                            resultado["identificador"]
+                    }
+                )
+                .scalar_one()
+            )
+
+        registrar_api(
+            servicio=(
+                ServicioApiEnum.EXCHANGE_RATE
+            ),
+
+            operacion=(
+                "CONSULTAR_USD_PEN"
+            ),
+
+            exitoso=True,
+
+            codigo_http=(
+                resultado["codigo_http"]
+            ),
+
+            identificador_externo=(
+                resultado["identificador"]
+            ),
+
+            respuesta={
+                "soles_por_dolar":
+                    str(
+                        resultado["soles_por_dolar"]
+                    )
+            }
+        )
+
+        db.session.commit()
+
+        return jsonify({
+            "exito": True,
+
+            "id_tipo_cambio":
+                id_tipo_cambio,
+
+            "soles_por_dolar":
+                str(
+                    resultado["soles_por_dolar"]
+                ),
+
+            "actualizado_en":
+                resultado.get(
+                    "actualizado_en"
+                )
+        })
+
+    except ErrorExchangeRate as error:
+
+        db.session.rollback()
+
+        try:
+
+            registrar_api(
+                servicio=(
+                    ServicioApiEnum.EXCHANGE_RATE
+                ),
+
+                operacion=(
+                    "CONSULTAR_USD_PEN"
+                ),
+
+                exitoso=False,
+
+                codigo_http=(
+                    error.codigo_http
+                ),
+
+                mensaje=str(
+                    error
+                )
+            )
+
+            db.session.commit()
+
+        except Exception:
+
+            db.session.rollback()
+
+        return jsonify({
+            "exito": False,
+            "mensaje": str(error)
+        }), 502
+
+    except Exception as error:
+
+        db.session.rollback()
+
+        print(
+            "ERROR ACTUALIZANDO TIPO DE CAMBIO:",
+            error
+        )
+
+        return jsonify({
+            "exito": False,
+            "mensaje": (
+                "No fue posible guardar el tipo de cambio."
+            )
+        }), 500
+
+
 # NUEVA COTIZACION
 # =========================================================
 
@@ -1557,32 +1640,23 @@ def nueva():
 
     if request.method == "GET":
 
-        try:
-
-            tipo_cambio = (
-                obtener_tipo_cambio()
-            )
-
-        except ErrorExchangeRate as error:
-
-            flash(
-                (
-                    "No se pudo obtener el tipo "
-                    f"de cambio: {error}"
-                ),
-                "danger"
-            )
-
-            return redirect(
-                url_for(
-                    "cotizaciones_vendedor.lista"
-                )
-            )
+        # Leer Neon es suficiente para mostrar la pantalla.
+        # La consulta a ExchangeRate-API se realiza después,
+        # desde el navegador y sin bloquear esta respuesta.
+        tipo_cambio = (
+            obtener_tipo_cambio_guardado()
+        )
 
         soles_por_dolar = (
-            tipo_cambio[
-                "soles_por_dolar"
-            ]
+            tipo_cambio["soles_por_dolar"]
+            if tipo_cambio
+            else None
+        )
+
+        id_tipo_cambio = (
+            tipo_cambio["id_tipo_cambio"]
+            if tipo_cambio
+            else None
         )
 
         clientes_recientes = (
@@ -1593,15 +1667,15 @@ def nueva():
             obtener_productos_recientes(
                 soles_por_dolar
             )
+            if soles_por_dolar is not None
+            else []
         )
 
         return render_template(
             "vendedor/cotizaciones/nueva.html",
 
             id_tipo_cambio=(
-                tipo_cambio[
-                    "id_tipo_cambio"
-                ]
+                id_tipo_cambio
             ),
 
             soles_por_dolar=(
