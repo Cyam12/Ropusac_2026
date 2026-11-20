@@ -199,17 +199,23 @@ Nueva Cotización
                     <input
                         type="text"
                         class="form-control"
-
-                        value="1 USD = {{ soles_por_dolar }} PEN"
-
+                        id="textoTipoCambio"
+                        value="{% if soles_por_dolar is not none %}1 USD = {{ soles_por_dolar }} PEN{% else %}Actualizando tipo de cambio...{% endif %}"
                         disabled
                     >
 
 
-                    <div class="form-text">
-
-                        ExchangeRate-API
-
+                    <div
+                        class="form-text"
+                        id="estadoTipoCambio"
+                        role="status"
+                        aria-live="polite"
+                    >
+                        {% if soles_por_dolar is not none %}
+                            Último valor guardado. Verificando actualización...
+                        {% else %}
+                            Consultando ExchangeRate-API...
+                        {% endif %}
                     </div>
 
                 </div>
@@ -543,9 +549,23 @@ Nueva Cotización
     // CONFIGURACION
     // =====================================================
 
-    const tipoCambio =
-        parseFloat(
-            "{{ soles_por_dolar }}"
+    let tipoCambio =
+        Number(
+            "{{ soles_por_dolar if soles_por_dolar is not none else '' }}"
+        );
+
+    let tipoCambioDisponible =
+        Number.isFinite(tipoCambio)
+        && tipoCambio > 0;
+
+    const textoTipoCambio =
+        document.getElementById(
+            "textoTipoCambio"
+        );
+
+    const estadoTipoCambio =
+        document.getElementById(
+            "estadoTipoCambio"
         );
 
 
@@ -563,7 +583,7 @@ Nueva Cotización
         {{ clientes_recientes | tojson }};
 
 
-    const productosRecientes =
+    let productosRecientes =
         {{ productos_recientes | tojson }};
 
 
@@ -975,6 +995,22 @@ Nueva Cotización
     buscarCliente.addEventListener(
         "focus",
         function () {
+
+            if (
+                !tipoCambioDisponible
+                || !idTipoCambio.value
+            ) {
+
+                event.preventDefault();
+
+                alert(
+                    "Espere a que se obtenga un tipo de cambio válido antes de generar la cotización."
+                );
+
+                return;
+
+            }
+
 
             if (
                 !idCliente.value
@@ -1416,6 +1452,10 @@ Nueva Cotización
         }
 
 
+        if (!tipoCambioDisponible) {
+            return 0;
+        }
+
         return (
             producto.precio_pen
             /
@@ -1856,17 +1896,17 @@ Nueva Cotización
 
 
             totalEquivalente.textContent =
-                (
+                tipoCambioDisponible
+                ? (
                     "US$ "
                     +
                     (
                         total
                         /
                         tipoCambio
-                    ).toFixed(
-                        2
-                    )
-                );
+                    ).toFixed(2)
+                )
+                : "No disponible";
 
         }
 
@@ -1909,21 +1949,103 @@ Nueva Cotización
 
 
             totalEquivalente.textContent =
-                (
+                tipoCambioDisponible
+                ? (
                     "S/ "
                     +
                     (
                         total
                         *
                         tipoCambio
-                    ).toFixed(
-                        2
-                    )
-                );
+                    ).toFixed(2)
+                )
+                : "No disponible";
 
         }
 
     }
+
+
+    // =====================================================
+    // ACTUALIZAR TIPO DE CAMBIO EN SEGUNDO PLANO
+    // =====================================================
+
+    async function actualizarTipoCambio() {
+
+        try {
+
+            const respuesta = await fetch(
+                "/vendedor/cotizaciones/tipo-cambio/actualizar",
+                {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": document.querySelector(
+                            'input[name="csrf_token"]'
+                        ).value,
+                        "Accept": "application/json"
+                    }
+                }
+            );
+
+            const datos = await respuesta.json();
+
+            if (!respuesta.ok || !datos.exito) {
+                throw new Error(
+                    datos.mensaje || "No se pudo actualizar el tipo de cambio."
+                );
+            }
+
+            const nuevaTasa = Number(
+                datos.soles_por_dolar
+            );
+
+            if (!Number.isFinite(nuevaTasa) || nuevaTasa <= 0) {
+                throw new Error("La API devolvió un tipo de cambio inválido.");
+            }
+
+            const tasaAnterior = tipoCambio;
+            const cambioTasa = !tipoCambioDisponible
+                || Math.abs(nuevaTasa - Number(tasaAnterior)) > 0.0000001;
+
+            tipoCambio = nuevaTasa;
+            tipoCambioDisponible = true;
+            idTipoCambio.value = datos.id_tipo_cambio;
+
+            textoTipoCambio.value =
+                "1 USD = " + nuevaTasa.toFixed(6) + " PEN";
+
+            estadoTipoCambio.textContent =
+                "Actualizado desde ExchangeRate-API";
+
+            // Si la tasa cambió, los productos en dólares y
+            // los equivalentes se recalculan con la tasa nueva.
+            if (cambioTasa) {
+                productosRecientes = await consultarProductos("");
+                if (buscarProducto.value.trim() === "") {
+                    renderizarResultadosProductos(
+                        productosRecientes
+                    );
+                }
+                renderizarProductos();
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Error actualizando tipo de cambio:",
+                error
+            );
+
+            estadoTipoCambio.textContent =
+                tipoCambioDisponible
+                ? "No se pudo actualizar. Se conserva el último valor guardado."
+                : "No se pudo obtener el tipo de cambio. Reintente la consulta.";
+
+        }
+
+    }
+
+    actualizarTipoCambio();
 
 
     // =====================================================
