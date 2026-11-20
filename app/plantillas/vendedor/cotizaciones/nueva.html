@@ -550,11 +550,13 @@ Nueva Cotización
     // =====================================================
 
     let tipoCambio =
-        {{ soles_por_dolar | tojson }};
+        Number(
+            "{{ soles_por_dolar if soles_por_dolar is not none else '' }}"
+        );
 
     let tipoCambioDisponible =
-        Number.isFinite(Number(tipoCambio))
-        && Number(tipoCambio) > 0;
+        Number.isFinite(tipoCambio)
+        && tipoCambio > 0;
 
     const textoTipoCambio =
         document.getElementById(
