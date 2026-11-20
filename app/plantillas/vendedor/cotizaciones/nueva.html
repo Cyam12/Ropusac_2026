@@ -997,6 +997,22 @@ Nueva Cotización
         function () {
 
             if (
+                !tipoCambioDisponible
+                || !idTipoCambio.value
+            ) {
+
+                event.preventDefault();
+
+                alert(
+                    "Espere a que se obtenga un tipo de cambio válido antes de generar la cotización."
+                );
+
+                return;
+
+            }
+
+
+            if (
                 !idCliente.value
             ) {
 
