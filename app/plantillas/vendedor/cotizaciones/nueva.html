@@ -2017,16 +2017,34 @@ Nueva Cotización
             estadoTipoCambio.textContent =
                 "Actualizado desde ExchangeRate-API";
 
-            // Si la tasa cambió, los productos en dólares y
-            // los equivalentes se recalculan con la tasa nueva.
+            // La tasa ya quedó actualizada en el formulario.
+            // La recarga de productos es independiente: si falla,
+            // no debe marcar como fallida la consulta a ExchangeRate-API.
             if (cambioTasa) {
-                productosRecientes = await consultarProductos("");
-                if (buscarProducto.value.trim() === "") {
-                    renderizarResultadosProductos(
-                        productosRecientes
-                    );
-                }
+
                 renderizarProductos();
+
+                consultarProductos("")
+                    .then(resultados => {
+
+                        productosRecientes = resultados;
+
+                        if (buscarProducto.value.trim() === "") {
+                            renderizarResultadosProductos(
+                                productosRecientes
+                            );
+                        }
+
+                    })
+                    .catch(error => {
+
+                        console.error(
+                            "No se pudieron recargar los productos:",
+                            error
+                        );
+
+                    });
+
             }
 
         } catch (error) {
@@ -2037,9 +2055,16 @@ Nueva Cotización
             );
 
             estadoTipoCambio.textContent =
-                tipoCambioDisponible
-                ? "No se pudo actualizar. Se conserva el último valor guardado."
-                : "No se pudo obtener el tipo de cambio. Reintente la consulta.";
+                (
+                    tipoCambioDisponible
+                    ? "No se pudo actualizar. Se conserva el último valor guardado. "
+                    : "No se pudo obtener el tipo de cambio. "
+                )
+                + (
+                    error && error.message
+                    ? error.message
+                    : "Revise los logs de Render."
+                );
 
         }
 
