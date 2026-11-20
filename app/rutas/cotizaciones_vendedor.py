@@ -1606,15 +1606,15 @@ def actualizar_tipo_cambio():
 
         db.session.rollback()
 
-        print(
-            "ERROR ACTUALIZANDO TIPO DE CAMBIO:",
-            error
+        bp.logger.exception(
+            "ERROR ACTUALIZANDO TIPO DE CAMBIO"
         )
 
         return jsonify({
             "exito": False,
             "mensaje": (
-                "No fue posible guardar el tipo de cambio."
+                "No fue posible guardar el tipo de cambio. "
+                "Revise los logs de Render para ver el detalle."
             )
         }), 500
 
