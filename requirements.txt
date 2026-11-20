@@ -2,6 +2,7 @@ Flask
 Flask-SQLAlchemy
 Flask-Migrate
 psycopg2-binary
+psycopg[binary]>=3.2,<4
 python-dotenv
 Werkzeug
 Flask-Login
