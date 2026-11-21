@@ -331,10 +331,20 @@ def serializar_producto(
 
 def obtener_clientes_recientes():
 
+    # Consultar únicamente los campos que necesita el formulario.
+    # Evita cargar relaciones ORM como cotizaciones y ventas,
+    # que no se utilizan al mostrar los clientes recientes.
     clientes = (
         db.session.execute(
             db.select(
-                Cliente
+                Cliente.id_cliente,
+                Cliente.nombres,
+                Cliente.apellidos,
+                Cliente.razon_social,
+                Cliente.numero_documento,
+                Cliente.tipo_documento,
+                Cliente.correo,
+                Cliente.direccion
             )
             .where(
                 Cliente.activo.is_(
@@ -342,21 +352,53 @@ def obtener_clientes_recientes():
                 )
             )
             .order_by(
-                Cliente.creado_en.desc(),
                 Cliente.id_cliente.desc()
             )
             .limit(
                 3
             )
         )
-        .scalars()
+        .mappings()
         .all()
     )
 
     return [
-        serializar_cliente(
-            cliente
-        )
+        {
+            "id":
+                cliente["id_cliente"],
+
+            "nombre":
+                (
+                    cliente["razon_social"]
+                    or " ".join(
+                        parte
+                        for parte in [
+                            cliente["nombres"],
+                            cliente["apellidos"]
+                        ]
+                        if parte
+                    ).strip()
+                ),
+
+            "documento":
+                (
+                    cliente["numero_documento"]
+                    or "SIN DOCUMENTO"
+                ),
+
+            "tipo_documento":
+                texto_enum(
+                    cliente["tipo_documento"]
+                ),
+
+            "correo":
+                cliente["correo"]
+                or "",
+
+            "direccion":
+                cliente["direccion"]
+                or ""
+        }
         for cliente in clientes
     ]
 
@@ -369,10 +411,20 @@ def obtener_productos_recientes(
     soles_por_dolar
 ):
 
+    # Recuperar solo las columnas visibles en el buscador.
+    # No se necesitan relaciones ni el resto de campos del producto.
     productos = (
         db.session.execute(
             db.select(
-                Producto
+                Producto.id_producto,
+                Producto.codigo_producto,
+                Producto.nombre,
+                Producto.marca,
+                Producto.modelo,
+                Producto.unidad_medida,
+                Producto.stock_disponible,
+                Producto.precio_venta_actual,
+                Producto.moneda_precio
             )
             .where(
                 Producto.activo.is_(
@@ -386,24 +438,76 @@ def obtener_productos_recientes(
                 Producto.stock_disponible > 0
             )
             .order_by(
-                Producto.creado_en.desc(),
                 Producto.id_producto.desc()
             )
             .limit(
                 3
             )
         )
-        .scalars()
+        .mappings()
         .all()
     )
 
-    return [
-        serializar_producto(
-            producto,
-            soles_por_dolar
+    resultados = []
+
+    for producto in productos:
+
+        precio = Decimal(
+            producto["precio_venta_actual"]
         )
-        for producto in productos
-    ]
+
+        moneda_producto = texto_enum(
+            producto["moneda_precio"]
+        )
+
+        if moneda_producto == "PEN":
+
+            precio_pen = dos_decimales(
+                precio
+            )
+
+        else:
+
+            precio_pen = dos_decimales(
+                precio
+                *
+                soles_por_dolar
+            )
+
+        resultados.append({
+
+            "id":
+                producto["id_producto"],
+
+            "codigo":
+                producto["codigo_producto"],
+
+            "nombre":
+                producto["nombre"],
+
+            "marca":
+                producto["marca"]
+                or "",
+
+            "modelo":
+                producto["modelo"]
+                or "",
+
+            "unidad":
+                producto["unidad_medida"],
+
+            "stock":
+                float(
+                    producto["stock_disponible"]
+                ),
+
+            "precio_pen":
+                float(
+                    precio_pen
+                )
+        })
+
+    return resultados
 
 
 # =========================================================
